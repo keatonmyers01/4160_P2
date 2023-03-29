@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import total_ordering
-from typing import Callable, Union
+from typing import Callable, Union, Type
 
 from pygame import Surface, Rect
 
@@ -230,10 +230,20 @@ class Entity(ABC):
         """
         Gets a list of nearby entities within the given radius.
 
-        :param radius: The maximum distance the entities can be.
+        :param radius: The maximum distance the entities can be, before being excluded.
         :return: A list of nearby entities within the given radius.
         """
         return [e for e in engine.entity_handler.entities if e.location.dist(self.location) <= radius]
+
+    def nearby_entities_type(self, radius: float, t: Type['Entity']) -> list['Entity']:
+        """
+        Gets a list of nearby entities within the given radius and of type t.
+
+        :param radius: The maximum distance the entities can be, before being excluded.
+        :param t: The type of the entities to look for.
+        :return: A list of nearby entities within the given radius and of type t.
+        """
+        return [e for e in engine.entity_handler.entities if e._loc.dist(self._loc) <= radius and isinstance(e, t)]
 
 
 class EntityHandler:
@@ -323,7 +333,15 @@ class EntityHandler:
         self._entities.clear()
 
     def get_clicked(self, mouse_pos: tuple[int, int]) -> Entity | None:
-        for entity in self._entities:
+        """
+        Gets the first Entity that's bounding box collides with the given mouse_pos.
+        Entities are sorted by render priority, from highest to lowest.
+        If no Entity collides with the given mouse_pos, None is returned.
+
+        :param mouse_pos: The coordinates of the mouse, on click.
+        :return: An optional Entity that's bounding box collides with the given mouse_pos.
+        """
+        for entity in reversed(self._entities):
             if entity.visible and entity.clicked_on(mouse_pos):
                 return entity
         return None
