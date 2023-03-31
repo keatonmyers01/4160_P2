@@ -259,3 +259,11 @@ class Location:
         :return: A `Rect` object with the current instance and the given width and height.
         """
         return Rect(self.x, self.y, width, height)
+
+    def copy(self) -> 'Location':
+        """
+        Returns a new instance of the current Location instance.
+
+        :return: A new Location instance with the same x, y.
+        """
+        return Location(self.x, self.y)
