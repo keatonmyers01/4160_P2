@@ -1,9 +1,14 @@
+from typing import Callable, Union
+
 from pygame import Rect, Surface
 
 from engine.entity import Entity
 from engine.errors import BadArgument
-from game.tower import Tower
-from game.texture import Texture
+from engine.location import Location
+from engine.util import min_max
+from game.tower import Tower, CoreTower
+
+CELL_SIZE = (20, 20)
 
 
 class Cell(Entity):
@@ -22,10 +27,10 @@ class Cell(Entity):
         if self._tower:
             self._tower.draw(surface)
         else:
-            pass  # todo
+            surface.fill((10, 10, 10), self.bounds())
 
     def bounds(self) -> Rect:
-        return self._tower.bounds()
+        return self.location.as_rect(CELL_SIZE[0], CELL_SIZE[1])
 
     @property
     def empty(self) -> bool:
@@ -39,31 +44,70 @@ class Cell(Entity):
     def y(self) -> int:
         return self._y
 
+    @property
+    def tower(self) -> Tower | None:
+        return self._tower
+
+    @tower.setter
+    def tower(self, value: Tower | None) -> None:
+        value.location = self.location.copy()
+        self._tower = value
+
+    @Entity.location.setter
+    def location(self, value: Union[Location, Callable[[Rect], Location]]) -> None:
+        self._loc = value if isinstance(value, Location) else value(self.bounds())
+        if self._tower:
+            self._tower.location = value
+
 
 class Grid(Entity):
 
     def __init__(self, w: int, h: int, *, core_at: tuple[int, int] | None = None):
+        super().__init__()
         if w < 1 or h < 1:
             raise BadArgument('Given width or height less than 1.')
         self._w = w
         self._h = h
-        self._cells: list[list[Cell]] = []
+        self._cells: list[list[Cell]] = [[Cell(i, j) for j in range(self._h)] for i in range(self._w)]
+        if core_at:
+            self._cells[core_at[0]][core_at[1]].tower = CoreTower()
 
     def on_load(self) -> None:
         for i in range(self._w):
             for j in range(self._h):
                 # todo: check if i, j at core_at and add core tower as arg
-                cell = Cell(i, j)
-                cell_bounds = cell.bounds()
+                cell = self._cells[i][j]
                 cell_loc = self.location.copy()
-                cell_loc.add(x=(i * cell_bounds.w), y=(j * cell_bounds.h))
+                cell_loc.add(x=(i * CELL_SIZE[0]), y=(j * CELL_SIZE[1]))
                 cell.location = cell_loc
 
     def tick(self, tick_count: int) -> None:
-        pass
+        for i in range(self._w):
+            for j in range(self._h):
+                self._cells[i][j].tick(tick_count)
 
     def draw(self, surface: Surface) -> None:
-        pass
+        for i in range(self._w):
+            for j in range(self._h):
+                self._cells[i][j].draw(surface)
 
     def bounds(self) -> Rect:
-        pass
+        return self.location.as_rect(CELL_SIZE[0] * self._w, CELL_SIZE[1] * self._h)
+
+    def get_cell_on_click(self, mouse_pos: tuple[int, int]) -> Cell | None:
+        if not self.bounds().collidepoint(mouse_pos):
+            return None
+        col = (mouse_pos[0] - self.location.x) // CELL_SIZE[0]
+        row = (mouse_pos[1] - self.location.y) // CELL_SIZE[1]
+        return self._cells[col][row]
+
+    def can_place_tower(self, mouse_pos: tuple[int, int]) -> Cell | None:
+        if cell := self.get_cell_on_click(mouse_pos):
+            up_cell = self._cells[cell.x][min_max(cell.y - 1, 0, 20)]
+            left_cell = self._cells[min_max(cell.x - 1, 0, 20)][cell.y]
+            right_cell = self._cells[min_max(cell.x + 1, 0, 20)][cell.y]
+            down_cell = self._cells[cell.x][min_max(cell.y + 1, 0, 20)]
+            for c in [up_cell, left_cell, right_cell, down_cell]:
+                if c.tower:
+                    return cell
+            return None

@@ -64,6 +64,7 @@ class Window:
         self._running = False
         self._surface = pygame.display.set_mode(size=resolution.as_tuple())
         self._clock = Clock()
+        self._tick_count = 0
 
     def start(self) -> None:
         """
@@ -76,10 +77,11 @@ class Window:
         self._running = True
 
         while self._running:
-            tick_count = self._clock.tick(self._fps) % self._fps
+            self._tick_count += 1
+            self._clock.tick(self._fps)
             self._surface.fill(self._background)
-            # todo: pass window events to event handler
-            engine.entity_handler.tick(tick_count)
+            engine.event_handler.handle_events(pygame.event.get())
+            engine.entity_handler.tick(self._tick_count)
             engine.entity_handler.draw(self._surface)
             pygame.display.flip()
 

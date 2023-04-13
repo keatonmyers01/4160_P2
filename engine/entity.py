@@ -2,9 +2,11 @@ from abc import ABC, abstractmethod
 from functools import total_ordering
 from typing import Callable, Union, Type
 
-from pygame import Surface, Rect
+from pygame import Surface, Rect, Color
+from pygame.font import Font
 
 import engine
+from engine.color import WHITE
 from engine.location import Location
 
 
@@ -365,3 +367,53 @@ class EntityHandler:
             if entity.dirty:
                 return True
         return False
+
+
+class String(Entity):
+
+    def __init__(self, font: Font, text: str, *, color: Color = WHITE, loc: Location = Location(0, 0)):
+        super().__init__(loc, priority=2)
+        self._font = font
+        self._color = color
+        self._text = text
+        self._surface = self._font.render(text, True, self._color)
+        self._surface.get_rect().x = self._loc.x
+        self._surface.get_rect().y = self._loc.y
+
+    def tick(self, tick_count: int) -> None:
+        # Do nothing
+        pass
+
+    def draw(self, surface: Surface) -> None:
+        surface.blit(self._surface, self._loc.as_tuple())
+
+    def bounds(self) -> Rect:
+        return self._surface.get_rect()
+
+    def _rerender(self) -> None:
+        self._surface = self._font.render(self._text, True, self._color)
+        self._surface.get_rect().x = self._loc.x
+        self._surface.get_rect().y = self._loc.y
+
+    @property
+    def text(self) -> str:
+        return self._text
+
+    @text.setter
+    def text(self, text: str) -> None:
+        self._text = text
+        self._rerender()
+
+    @Entity.location.setter
+    def location(self, value: Union[Location, Callable[[Rect], Location]]) -> None:
+        self._loc = value if isinstance(value, Location) else value(self.bounds())
+        self._rerender()
+
+    @property
+    def color(self) -> Color:
+        return self._color
+
+    @color.setter
+    def color(self, value: Color) -> None:
+        self._color = value
+        self._rerender()
