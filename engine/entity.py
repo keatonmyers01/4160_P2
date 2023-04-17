@@ -1,3 +1,4 @@
+import uuid
 from abc import ABC, abstractmethod
 from functools import total_ordering
 from typing import Callable, Union, Type
@@ -18,6 +19,7 @@ class Entity(ABC):
     """
 
     def __init__(self, loc: Location = Location(), priority: int = 0):
+        self._id = uuid.uuid4()
         self._loc = loc
         self._dirty = False
         self._loaded = False
@@ -32,7 +34,10 @@ class Entity(ABC):
         return self._priority < other._priority
 
     def __eq__(self, other: 'Entity') -> bool:
-        return self._priority == other._priority
+        return self._id == other._id
+
+    def __gt__(self, other: 'Entity'):
+        return self._priority > other._priority
 
     # Abstract methods
 
@@ -68,9 +73,19 @@ class Entity(ABC):
 
     # Optional method
 
-    def on_load(self) -> None:
+    def _on_load(self) -> None:
         """
         Used to load anything the Entity hasn't already loaded upon instantiation.
+
+        Optional method.
+
+        :return: None
+        """
+        pass
+
+    def _on_dispose(self) -> None:
+        """
+        Used to unload anything the Entity hasn't already on disposal of the Entity.
 
         Optional method.
 
@@ -189,6 +204,7 @@ class Entity(ABC):
         :return: None.
         """
         self._should_remove = True
+        self._on_dispose()
 
     def spawn(self) -> None:
         """
@@ -198,7 +214,7 @@ class Entity(ABC):
         :return: None.
         """
         if not self._loaded:
-            self.on_load()
+            self._on_load()
             self._loaded = True
             self._visible = True
 
@@ -245,7 +261,50 @@ class Entity(ABC):
         :param t: The type of the entities to look for.
         :return: A list of nearby entities within the given radius and of type t.
         """
-        return [e for e in engine.entity_handler.entities if e._loc.dist(self._loc) <= radius and isinstance(e, t)]
+        return [e for e in engine.entity_handler.entities if e._loc.dist(self._loc) <= radius and type(e) is t]
+
+
+class LivingEntity(Entity):
+
+    def __init__(self, location: Location = Location(),
+                 priority: int = 0,
+                 *,
+                 health: int = 0,
+                 velocity: tuple[int, int] = (0, 0)):
+        super().__init__(location, priority)
+        self._health = health
+        self._velocity = velocity
+
+    @property
+    def velocity(self) -> tuple[int, int]:
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value: tuple[int, int]) -> None:
+        self._velocity = value
+
+    def tick(self, tick_count: int) -> None:
+        if self._health <= 0:
+            self._on_death()
+            self.dispose()
+            return
+        self.location.add(self.velocity[0], self.velocity[1])
+
+    def damage(self, amount: int) -> None:
+        self._health -= amount
+        self._on_damage()
+
+    @abstractmethod
+    def _on_damage(self) -> None:
+        pass
+
+    @abstractmethod
+    def _on_heal(self) -> None:
+        pass
+
+    @abstractmethod
+    def _on_death(self) -> None:
+        pass
 
 
 class EntityHandler:
@@ -255,6 +314,8 @@ class EntityHandler:
 
     def __init__(self):
         self._entities: list[Entity] = []
+        self._despawn_offscreen = False
+        self._safe_rect: Rect | None = None
 
     def tick(self, tick_count: int) -> None:
         """
@@ -270,6 +331,9 @@ class EntityHandler:
             self._entities.sort()
 
         for entity in self._entities:
+            if self._despawn_offscreen:
+                if not self._safe_rect.colliderect(entity.bounds()):
+                    entity.dispose()
             if entity.should_remove():
                 self._entities.remove(entity)
                 del entity
@@ -356,6 +420,31 @@ class EntityHandler:
         :return: A list of entities, sorted by their render priority.
         """
         return self._entities
+
+    def get_entities(self, entity_type: Type[Entity]) -> list[Entity]:
+        """
+        Gets a list of Entity's that are of type `entity_type`.
+
+        :param entity_type: The type of Entity to look for.
+        :return: A list of Entity's that are of type `entity_type`.
+        """
+        return [e for e in self._entities if isinstance(e, entity_type)]
+
+    def dispose_offscreen_entities(self, dispose: bool, *, pixels_offscreen: int = 0) -> None:
+        """
+        Tells the Entity Handler to dispose entities that are off the screen by the given
+        `pixels_offscreen` radius. Takes into account the window's width and height.
+
+        :param dispose: Whether to dispose of the offscreen entities.
+        :param pixels_offscreen: The distance away from the screen to dispose.
+        :return: None
+        """
+        resolution = engine.window.resolution
+        self._despawn_offscreen = dispose
+        self._safe_rect = Rect(-pixels_offscreen,
+                               -pixels_offscreen,
+                               resolution.width + (pixels_offscreen * 2),
+                               resolution.height + (pixels_offscreen * 2))
 
     def _check_dirty(self) -> bool:
         """

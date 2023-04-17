@@ -85,6 +85,8 @@ class Window:
             engine.entity_handler.draw(self._surface)
             pygame.display.flip()
 
+        engine.entity_handler.clear()
+        engine.event_handler.clear()
         pygame.quit()
         sys.exit()
 

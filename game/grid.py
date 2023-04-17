@@ -6,9 +6,8 @@ from engine.entity import Entity
 from engine.errors import BadArgument
 from engine.location import Location
 from engine.util import min_max
+from game.constants import CELL_SIZE
 from game.tower import Tower, CoreTower
-
-CELL_SIZE = (20, 20)
 
 
 class Cell(Entity):
@@ -52,6 +51,8 @@ class Cell(Entity):
     def tower(self, value: Tower | None) -> None:
         value.location = self.location.copy()
         self._tower = value
+        if value:
+            value.spawn()
 
     @Entity.location.setter
     def location(self, value: Union[Location, Callable[[Rect], Location]]) -> None:
@@ -72,7 +73,7 @@ class Grid(Entity):
         if core_at:
             self._cells[core_at[0]][core_at[1]].tower = CoreTower()
 
-    def on_load(self) -> None:
+    def _on_load(self) -> None:
         for i in range(self._w):
             for j in range(self._h):
                 # todo: check if i, j at core_at and add core tower as arg
