@@ -3,12 +3,14 @@ from abc import ABC, abstractmethod
 from functools import total_ordering
 from typing import Callable, Union, Type
 
+import pygame.image
 from pygame import Surface, Rect, Color
 from pygame.font import Font
 
 import engine
 from engine.color import WHITE
 from engine.location import Location
+from game.texture import Texture
 
 
 @total_ordering
@@ -21,7 +23,7 @@ class Entity(ABC):
     def __init__(self, loc: Location = Location(), priority: int = 0):
         self._id = uuid.uuid4()
         self._loc = loc
-        self._dirty = False
+        self._dirty = True
         self._loaded = False
         self._visible = False
         self._removed = False
@@ -176,6 +178,15 @@ class Entity(ABC):
         """
         return self._dirty
 
+    @property
+    def removed(self) -> bool:
+        """
+        Checks if the Entity has been removed.
+
+        :return: True if the Entity has been removed, False otherwise.
+        """
+        return self._removed
+
     # Methods
 
     def should_draw(self) -> bool:
@@ -272,16 +283,8 @@ class LivingEntity(Entity):
                  health: int = 0,
                  velocity: tuple[int, int] = (0, 0)):
         super().__init__(location, priority)
-        self._health = health
+        self._health = min(health, self.max_health)
         self._velocity = velocity
-
-    @property
-    def velocity(self) -> tuple[int, int]:
-        return self._velocity
-
-    @velocity.setter
-    def velocity(self, value: tuple[int, int]) -> None:
-        self._velocity = value
 
     def tick(self, tick_count: int) -> None:
         if self._health <= 0:
@@ -293,6 +296,33 @@ class LivingEntity(Entity):
     def damage(self, amount: int) -> None:
         self._health -= amount
         self._on_damage()
+
+    def heal(self, amount: int) -> None:
+        self._health = max(self.max_health, self._health + amount)
+        self._on_heal()
+
+    @property
+    def velocity(self) -> tuple[int, int]:
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value: tuple[int, int]) -> None:
+        self._velocity = value
+
+    @property
+    def health(self) -> int:
+        return self._health
+
+    @health.setter
+    def health(self, value: int) -> None:
+        if value <= 0:
+            self._health = 0
+            self._on_death()
+
+    @property
+    @abstractmethod
+    def max_health(self) -> int:
+        pass
 
     @abstractmethod
     def _on_damage(self) -> None:
@@ -506,3 +536,25 @@ class String(Entity):
     def color(self, value: Color) -> None:
         self._color = value
         self._rerender()
+
+
+class TiledBackground(Entity):
+
+    def __init__(self, texture: Texture, tile_size: tuple[int, int]):
+        super().__init__(priority=-1)
+        self._texture = pygame.image.load(texture.value)
+        self._texture = pygame.transform.scale(self._texture, tile_size)
+
+    def tick(self, tick_count: int) -> None:
+        # do nothing
+        pass
+
+    def draw(self, surface: Surface) -> None:
+        res = engine.window.resolution
+        for x in range(0, res.width, self._texture.get_width()):
+            for y in range(0, res.height, self._texture.get_height()):
+                surface.blit(self._texture, (x, y))
+
+    def bounds(self) -> Rect:
+        res = engine.window.resolution
+        return self.location.as_rect(res.width, res.height)

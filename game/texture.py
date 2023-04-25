@@ -8,3 +8,4 @@ class Texture(Enum):
     # we can create an enum for each type
     EMPTY_CELL = 'game/asset/empty_space.png'
     CORE_TOWER = 'game/asset/core.png'
+    BRICK_WALL = 'game/asset/brick_wall.jpg'

@@ -64,7 +64,7 @@ class Cell(Entity):
 class Grid(Entity):
 
     def __init__(self, w: int, h: int, *, core_at: tuple[int, int] | None = None):
-        super().__init__()
+        super().__init__(priority=10)
         if w < 1 or h < 1:
             raise BadArgument('Given width or height less than 1.')
         self._w = w
@@ -76,7 +76,6 @@ class Grid(Entity):
     def _on_load(self) -> None:
         for i in range(self._w):
             for j in range(self._h):
-                # todo: check if i, j at core_at and add core tower as arg
                 cell = self._cells[i][j]
                 cell_loc = self.location.copy()
                 cell_loc.add(x=(i * CELL_SIZE[0]), y=(j * CELL_SIZE[1]))
@@ -95,6 +94,10 @@ class Grid(Entity):
     def bounds(self) -> Rect:
         return self.location.as_rect(CELL_SIZE[0] * self._w, CELL_SIZE[1] * self._h)
 
+    @property
+    def cells(self) -> list[list[Cell]]:
+        return self._cells
+
     def get_cell_on_click(self, mouse_pos: tuple[int, int]) -> Cell | None:
         if not self.bounds().collidepoint(mouse_pos):
             return None
@@ -111,4 +114,4 @@ class Grid(Entity):
             for c in [up_cell, left_cell, right_cell, down_cell]:
                 if c.tower:
                     return cell
-            return None
+        return None

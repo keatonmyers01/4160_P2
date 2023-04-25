@@ -158,6 +158,19 @@ class Location:
         h = randint(0, res.height - box.h)
         return Location(w, h)
 
+    @staticmethod
+    def top_and_centered(top_rect: Rect, bottom_rect: Rect) -> 'Location':
+        """
+
+
+        :param top_rect:
+        :param bottom_rect:
+        :return:
+        """
+        w = bottom_rect.x + (bottom_rect.w / 2) - (top_rect.w / 2)
+        h = bottom_rect.y - top_rect.h
+        return Location(w, h)
+
     def add(self, x: int = 0, y: int = 0) -> None:
         """
         Adds the given x and y amounts to the location.

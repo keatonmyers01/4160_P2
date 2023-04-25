@@ -1,2 +1,2 @@
 
-CELL_SIZE: tuple[int, int] = (20, 20)
+CELL_SIZE: tuple[int, int] = (32, 32)

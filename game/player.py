@@ -8,6 +8,10 @@ class Player(LivingEntity):
     def __init__(self):
         super().__init__()
 
+    @property
+    def max_health(self) -> int:
+        pass
+
     def _on_damage(self) -> None:
         pass
 
