@@ -15,6 +15,8 @@ from game.player import Player
 from game.projectile import ArcherProjectile
 from game.projectile import GrapeShotProjectile
 from game.projectile import ShrapnelProjectile
+from game.projectile import MinefieldProjectile
+from game.projectile import GrenadierProjectile
 from game.texture import Texture
 
 
@@ -49,6 +51,11 @@ class Tower(Entity):
     def __init__(self, *, stage: TowerStage = TowerStage.STAGE_1):
         super().__init__()
         self.on_cooldown = True
+        self._regeneration_rate = 0
+        self._starting_health = 0
+        self._building_cost = 0
+        self._ability_cooldown = 0
+        self._area_of_effect = 0
         self.ability_timer = Timer(self.ability_cooldown(), self.perform_ability)
         self._stage = stage
 
@@ -71,29 +78,12 @@ class Tower(Entity):
         w, h = CELL_SIZE
         return self.location.as_rect(w, h)
 
-    @property
-    def stage(self) -> TowerStage:
-        return self._stage
-
-    @stage.setter
-    def stage(self, value: TowerStage) -> None:
-        self._stage = value
-        self._on_upgrade(stage=value)
-
     @abstractmethod
-    def regeneration_rate(self) -> int:
-        """
-        The amount of regeneration per second.
-        :return:
-        """
+    def _on_ability(self, *args: Entity) -> None:
         pass
 
     @abstractmethod
-    def starting_health(self) -> int:
-        """
-        The amount of health that a tower spawns with.
-        :return:
-        """
+    def _on_upgrade(self, stage: TowerStage) -> None:
         pass
 
     @abstractmethod
@@ -104,32 +94,45 @@ class Tower(Entity):
         """
         pass
 
-    @abstractmethod
+    @property
+    def stage(self) -> TowerStage:
+        return self._stage
+
+    @stage.setter
+    def stage(self, value: TowerStage) -> None:
+        self._stage = value
+        self._on_upgrade(value)
+
+    def regeneration_rate(self) -> int:
+        """
+        The amount of regeneration per second.
+        :return:
+        """
+        return self._regeneration_rate
+
+    def starting_health(self) -> int:
+        """
+        The amount of health that a tower spawns with.
+        :return:
+        """
+        return self._starting_health
+
     def build_cost(self) -> int:
         """
         The amount of currency that the tower requires in order to build.
         :return:
         """
-        pass
+        return self._building_cost
 
-    @abstractmethod
     def ability_cooldown(self) -> float:
         """
         The amount of time, in seconds, to wait until the tower can use its ability.
         :return:
         """
-        pass
-
-    @abstractmethod
-    def _on_ability(self, *args: Entity) -> None:
-        pass
-
-    @abstractmethod
-    def _on_upgrade(self, stage: TowerStage) -> None:
-        pass
+        return self._ability_cooldown
 
     def area_of_effect(self) -> int:
-        return 0
+        return self._area_of_effect
 
     def perform_ability(self) -> None:
         targets: list[Entity] = []
@@ -147,6 +150,22 @@ class Tower(Entity):
             self.ability_timer.start()
             return
         self.on_cooldown = False
+
+    def aquire_projectile_velocities(self, target: Entity, max_velocity: int) -> tuple[int, int]:
+        orgin = self.location
+        target_location = target.location
+        x_distance = orgin.dist_x(target_location)
+        y_distance = orgin.dist_y(target_location)
+        total_distance = abs(y_distance) + abs(x_distance)
+        distance_ratio = abs(x_distance / total_distance)
+        x_velocity = round(distance_ratio * max_velocity)
+        y_velocity = round((1 - distance_ratio) * max_velocity)
+        if x_distance < 0:
+            x_velocity *= -1
+        if y_distance < 0:
+            y_velocity *= -1
+
+        return x_velocity, y_velocity
 
 
 class CoreTower(Tower):
@@ -233,27 +252,16 @@ class Archer(Tower):
                 damage = 30
                 max_velocity = 5
             case TowerStage.STAGE_2:
-                damage = 40
+                damage = 45
                 max_velocity = 5
             case TowerStage.STAGE_3:
                 damage = 60
                 max_velocity = 5
             case _:
                 raise EngineError()
-        orgin = self.location.copy()
-        target_location = args[0].location
-        x_distance = orgin.dist_x(target_location)
-        y_distance = orgin.dist_y(target_location)
-        total_distance = abs(y_distance) + abs(x_distance)
-        distance_ratio = abs(x_distance / total_distance)
-        x_velocity = round(distance_ratio * max_velocity)
-        y_velocity = round((1 - distance_ratio) * max_velocity)
-        if x_distance < 0:
-            x_velocity *= -1
-        if y_distance < 0:
-            y_velocity *= -1
-        projectile_velocity = (x_velocity, y_velocity)
-        projectile = ArcherProjectile(location=orgin, velocity=projectile_velocity, damage=damage, priority=20)
+
+        projectile_velocity = self.aquire_projectile_velocities(args[0], max_velocity)
+        projectile = ArcherProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=damage, priority=20)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
 
@@ -308,24 +316,11 @@ class GrapeShot(Tower):
                 damage = 45
             case _:
                 raise EngineError('L')
-        orgin = self.location
-        target_location = args[0].location
-        x_distance = orgin.dist_x(target_location)
-        y_distance = orgin.dist_y(target_location)
-        total_distance = abs(y_distance) + abs(x_distance)
-        distance_ratio = abs(x_distance / total_distance)
-        x_velocity = round(distance_ratio * max_velocity)
-        y_velocity = round((1 - distance_ratio) * max_velocity)
-        if x_distance < 0:
-            x_velocity *= -1
-        if y_distance < 0:
-            y_velocity *= -1
-
+        projectile_velocity = self.aquire_projectile_velocities(args[0], max_velocity)
         for i in range(projectile_count):
-            dx = x_velocity + random.randint(-1, 1)
-            dy = y_velocity + random.randint(-1, 1)
-            print(f'{dx}, {dy}')
-            projectile = GrapeShotProjectile(location=orgin.copy(), velocity=(dx, dy), damage=damage, priority=20+i)
+            dx = projectile_velocity[0] + random.randint(-1, 1)
+            dy = projectile_velocity[1] + random.randint(-1, 1)
+            projectile = GrapeShotProjectile(location=self.location.copy(), velocity=(dx, dy), damage=damage, priority=20+i)
             engine.entity_handler.register_entity(projectile)
             projectile.spawn()
 
@@ -367,34 +362,21 @@ class ShrapnelCannon(Tower):
     def _on_ability(self, *args: Enemy) -> None:
         match self.stage:
             case TowerStage.STAGE_1:
-                max_volocity = 3
+                max_velocity = 3
                 damage = 15
                 secondary_count = 6
             case TowerStage.STAGE_2:
-                max_volocity = 3
+                max_velocity = 3
                 damage = 20
                 secondary_count = 10
             case TowerStage.STAGE_3:
-                max_volocity = 3
+                max_velocity = 3
                 damage = 30
                 secondary_count = 15
             case _:
                 raise EngineError('L')
-        orgin = self.location.copy()
-        target_location = args[0].location
-        x_distance = orgin.dist_x(target_location)
-        y_distance = orgin.dist_y(target_location)
-        total_distance = abs(y_distance) + abs(x_distance)
-        distance_ratio = abs(x_distance / total_distance)
-        x_velocity = round(distance_ratio * max_volocity)
-        y_velocity = round((1 - distance_ratio) * max_volocity)
-        if x_distance < 0:
-            x_velocity *= -1
-        if y_distance < 0:
-            y_velocity *= -1
-
-        projectile_velocity = (x_velocity, y_velocity)
-        projectile = ShrapnelProjectile(location=orgin, velocity=projectile_velocity, damage=damage, priority=20, secondary_count=secondary_count)
+        projectile_velocity = self.aquire_projectile_velocities(args[0], max_velocity)
+        projectile = ShrapnelProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=damage, priority=20, secondary_count=secondary_count)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
 
@@ -434,7 +416,16 @@ class ShrapnelCannon(Tower):
 class Sniper(Tower):
 
     def _on_ability(self, *args: Enemy) -> None:
-        args[0].damage(150)
+        match self.stage:
+            case TowerStage.STAGE_1:
+                damage = 150
+            case TowerStage.STAGE_2:
+                damage = 300
+            case TowerStage.STAGE_3:
+                damage = 600
+            case _:
+                raise EngineError('L')
+        args[0].damage(damage)
 
     def __init__(self):
         super().__init__()
@@ -463,7 +454,183 @@ class Sniper(Tower):
         return 3
 
     def area_of_effect(self) -> int:
-        return 150
+        return 400
+
+    def _on_upgrade(self, stage: TowerStage) -> None:
+        pass
+
+
+class Minefield(Tower):
+
+    def _on_ability(self, *args: Enemy | None) -> None:
+        match self.stage:
+            case TowerStage.STAGE_1:
+                damage = 30
+                max_velocity = 5
+                lifespan = 5
+                aoe_radius = 100
+            case TowerStage.STAGE_2:
+                damage = 40
+                max_velocity = 5
+                lifespan = 7
+                aoe_radius = 150
+            case TowerStage.STAGE_3:
+                damage = 60
+                max_velocity = 5
+                lifespan = 10
+                aoe_radius = 250
+            case _:
+                raise EngineError()
+        velocity_seed = random.randint(0, max_velocity)
+        x_mod = 1
+        y_mod = 1
+        if random.randint(0, 1):
+            x_mod *= -1
+        if random.randint(0, 1):
+            y_mod *= -1
+        projectile_velocity = (velocity_seed * x_mod, (5 - velocity_seed) * y_mod)
+        projectile = MinefieldProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=damage, priority=20, aoe_radius=aoe_radius, life_span=lifespan)
+        engine.entity_handler.register_entity(projectile)
+        projectile.spawn()
+
+    def __init__(self):
+        super().__init__()
+        self.texture = pygame.image.load(Texture.CORE_TOWER.value)
+        self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
+
+    def tick(self, tick_count: int) -> None:
+        super().tick(tick_count)
+
+    def draw(self, surface: Surface) -> None:
+        surface.blit(self.texture, self.location.as_tuple())
+
+    def regeneration_rate(self) -> int:
+        return 0
+
+    def starting_health(self) -> int:
+        return 250
+
+    def entity_target(self) -> EntityTargetType:
+        return EntityTargetType.NONE
+
+    def build_cost(self) -> int:
+        return 30
+
+    def ability_cooldown(self) -> float:
+        return 1
+
+    def area_of_effect(self) -> int:
+        return 200
+
+    def _on_upgrade(self, stage: TowerStage) -> None:
+        pass
+
+
+class Grenadier(Tower):
+
+    def _on_ability(self, *args: Enemy) -> None:
+        match self.stage:
+            case TowerStage.STAGE_1:
+                damage = 30
+                max_velocity = 5
+            case TowerStage.STAGE_2:
+                damage = 40
+                max_velocity = 5
+            case TowerStage.STAGE_3:
+                damage = 60
+                max_velocity = 5
+            case _:
+                raise EngineError()
+        projectile_velocity = self.aquire_projectile_velocities(args[0], max_velocity)
+        projectile = GrenadierProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=damage, priority=20)
+        engine.entity_handler.register_entity(projectile)
+        projectile.spawn()
+
+    def __init__(self):
+        super().__init__()
+        self.texture = pygame.image.load(Texture.CORE_TOWER.value)
+        self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
+
+    def tick(self, tick_count: int) -> None:
+        super().tick(tick_count)
+
+    def draw(self, surface: Surface) -> None:
+        surface.blit(self.texture, self.location.as_tuple())
+
+    def regeneration_rate(self) -> int:
+        return 0
+
+    def starting_health(self) -> int:
+        return 250
+
+    def entity_target(self) -> EntityTargetType:
+        return EntityTargetType.ENEMY
+
+    def build_cost(self) -> int:
+        return 30
+
+    def ability_cooldown(self) -> float:
+        return 1
+
+    def area_of_effect(self) -> int:
+        return 200
+
+    def _on_upgrade(self, stage: TowerStage) -> None:
+        pass
+
+
+class Leach(Tower):
+
+    def _on_ability(self, *args: Enemy) -> None:
+        match self.stage:
+            case TowerStage.STAGE_1:
+                damage = 40
+                radius = 75
+                healing = 5
+            case TowerStage.STAGE_2:
+                damage = 65
+                radius = 85
+                healing = 7
+            case TowerStage.STAGE_3:
+                damage = 90
+                radius = 100
+                healing = 10
+            case _:
+                raise EngineError('L')
+        targets = args[0].nearby_entities_type(radius, Enemy)
+
+        for target in targets:
+            target.damage(damage)
+            #TODO add in the healing
+
+    def __init__(self):
+        super().__init__()
+        self.texture = pygame.image.load(Texture.CORE_TOWER.value)
+        self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
+
+    def tick(self, tick_count: int) -> None:
+        super().tick(tick_count)
+
+    def draw(self, surface: Surface) -> None:
+        surface.blit(self.texture, self.location.as_tuple())
+
+    def regeneration_rate(self) -> int:
+        return 0
+
+    def starting_health(self) -> int:
+        return 250
+
+    def entity_target(self) -> EntityTargetType:
+        return EntityTargetType.ENEMY
+
+    def build_cost(self) -> int:
+        return 30
+
+    def ability_cooldown(self) -> float:
+        return 4
+
+    def area_of_effect(self) -> int:
+        return 300
 
     def _on_upgrade(self, stage: TowerStage) -> None:
         pass

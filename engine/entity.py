@@ -274,6 +274,28 @@ class Entity(ABC):
         """
         return [e for e in engine.entity_handler.entities if e._loc.dist(self._loc) <= radius and type(e) is t]
 
+    def nearest_entity(self) -> 'Entity | None':
+        nearest: Entity | None = None
+        for entity in engine.entity_handler.entities:
+            if nearest is None:
+                nearest = entity
+                continue
+            if entity.location.dist(self.location) <= nearest.location.dist(self.location):
+                nearest = entity
+        return nearest
+
+    def nearest_entity_type(self, t: Type['Entity']) -> 'Entity | None':
+        nearest: Entity | None = None
+        for entity in engine.entity_handler.entities:
+            if not isinstance(entity, t):
+                continue
+            if nearest is None:
+                nearest = entity
+                continue
+            if entity.location.dist(self.location) <= nearest.location.dist(self.location):
+                nearest = entity
+        return nearest
+
 
 class LivingEntity(Entity):
 

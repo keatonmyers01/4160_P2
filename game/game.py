@@ -8,7 +8,7 @@ from engine.util import random_color
 from game.enemy import Enemy
 from game.grid import Grid
 from game.texture import Texture
-from game.tower import Archer, GrapeShot
+from game.tower import Minefield
 
 
 class Game:  # Just gonna call it "Game" for now...
@@ -23,7 +23,7 @@ class Game:  # Just gonna call it "Game" for now...
         self.bg = TiledBackground(Texture.BRICK_WALL, (128, 128))
         self.grid = Grid(25, 17, core_at=(13, 9))
         self.grid.location = Location.center
-        self.grid.cells[0][0].tower = GrapeShot()
+        self.grid.cells[0][0].tower = Minefield()
         engine.entity_handler.register_entity(self.grid)
         engine.entity_handler.register_entity(self.bg)
         engine.entity_handler.dispose_offscreen_entities(True, pixels_offscreen=300)

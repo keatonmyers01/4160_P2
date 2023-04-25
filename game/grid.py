@@ -26,7 +26,7 @@ class Cell(Entity):
         if self._tower:
             self._tower.draw(surface)
         else:
-            surface.fill((10, 10, 10), self.bounds())
+            surface.fill((64, 64, 64), self.bounds())
 
     def bounds(self) -> Rect:
         return self.location.as_rect(CELL_SIZE[0], CELL_SIZE[1])
