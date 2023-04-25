@@ -12,7 +12,7 @@ from engine.entity import Entity
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.player import Player
-from game.projectile import ArcherProjectile
+from game.projectile import ArcherProjectile, HealerProjectile
 from game.projectile import GrapeShotProjectile
 from game.projectile import ShrapnelProjectile
 from game.projectile import MinefieldProjectile
@@ -171,7 +171,23 @@ class Tower(Entity):
 class CoreTower(Tower):
 
     def _on_ability(self, *args: Enemy) -> None:
-        args[0].damage(50)
+        match self.stage:
+            case TowerStage.STAGE_1:
+                damage = 40
+                max_velocity = 8
+            case TowerStage.STAGE_2:
+                damage = 50
+                max_velocity = 8
+            case TowerStage.STAGE_3:
+                damage = 80
+                max_velocity = 8
+            case _:
+                raise EngineError()
+
+        projectile_velocity = self.aquire_projectile_velocities(args[0], max_velocity)
+        projectile = ArcherProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=damage, priority=20)
+        engine.entity_handler.register_entity(projectile)
+        projectile.spawn()
 
     def __init__(self):
         super().__init__()
@@ -209,7 +225,28 @@ class CoreTower(Tower):
 class Healer(Tower):
 
     def _on_ability(self, *args: Enemy) -> None:
-        pass
+        match self.stage:
+            case TowerStage.STAGE_1:
+                health = 30
+                healing_rate = 10
+                detect_range = 100
+                life_span = 10
+            case TowerStage.STAGE_2:
+                health = 60
+                healing_rate = 15
+                detect_range = 150
+                life_span = 10
+            case TowerStage.STAGE_3:
+                health = 100
+                healing_rate = 20
+                detect_range = 200
+                life_span = 10
+            case _:
+                raise EngineError()
+
+        projectile = HealerProjectile(location=self.location.copy(), velocity=(0,0), health=health, healing_rate=healing_rate, priority=20, detect_range=detect_range, life_span=life_span)
+        engine.entity_handler.register_entity(projectile)
+        projectile.spawn()
 
     def __init__(self):
         super().__init__()
@@ -229,7 +266,7 @@ class Healer(Tower):
         return 200
 
     def entity_target(self) -> EntityTargetType:
-        return EntityTargetType.TOWER
+        return EntityTargetType.NONE
 
     def build_cost(self) -> int:
         return 30
@@ -533,16 +570,19 @@ class Grenadier(Tower):
             case TowerStage.STAGE_1:
                 damage = 30
                 max_velocity = 5
+                aoe_radius = 150
             case TowerStage.STAGE_2:
                 damage = 40
                 max_velocity = 5
+                aoe_radius = 150
             case TowerStage.STAGE_3:
                 damage = 60
                 max_velocity = 5
+                aoe_radius = 150
             case _:
                 raise EngineError()
         projectile_velocity = self.aquire_projectile_velocities(args[0], max_velocity)
-        projectile = GrenadierProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=damage, priority=20)
+        projectile = GrenadierProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=damage, priority=20, aoe_radius = aoe_radius)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
 
