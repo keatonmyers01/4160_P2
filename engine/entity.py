@@ -448,6 +448,7 @@ class EntityHandler:
 
         :return: None.
         """
+        self.dispose_all()
         self._entities.clear()
 
     def get_clicked(self, mouse_pos: tuple[int, int]) -> Entity | None:

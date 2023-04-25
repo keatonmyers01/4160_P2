@@ -60,6 +60,10 @@ class Cell(Entity):
         if self._tower:
             self._tower.location = value
 
+    def _on_dispose(self) -> None:
+        if self._tower:
+            self._tower.dispose()
+
 
 class Grid(Entity):
 
@@ -115,3 +119,8 @@ class Grid(Entity):
                 if c.tower:
                     return cell
         return None
+
+    def _on_dispose(self) -> None:
+        for i in range(self._w):
+            for j in range(self._h):
+                self._cells[i][j].dispose()
