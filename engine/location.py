@@ -11,7 +11,7 @@ class Location:
     Representation of a location on a 2D plane.
     """
 
-    def __init__(self, x: int = 0, y: int = 0):
+    def __init__(self, x: float = 0, y: float = 0):
         self.x = x
         self.y = y
 
@@ -41,7 +41,7 @@ class Location:
         :return: A location corresponding to the top center of the window.
         """
         res = engine.window.resolution
-        return Location(int((res.width / 2) - (box.w / 2)), 0)
+        return Location((res.width / 2) - (box.w / 2)), 0
 
     @staticmethod
     def top_right(box: Rect) -> 'Location':
@@ -67,8 +67,8 @@ class Location:
         :return: A location corresponding to the center of the window.
         """
         res = engine.window.resolution
-        w = int((res.width / 2) - (box.w / 2))
-        h = int((res.height / 2) - (box.h / 2))
+        w = (res.width / 2) - (box.w / 2)
+        h = (res.height / 2) - (box.h / 2)
         return Location(w, h)
 
     @staticmethod
@@ -82,7 +82,7 @@ class Location:
         :return: A location corresponding to the center left of the window.
         """
         res = engine.window.resolution
-        return Location(0, int((res.height / 2) - (box.h / 2)))
+        return Location(0, (res.height / 2) - (box.h / 2))
 
     @staticmethod
     def center_right(box: Rect) -> 'Location':
@@ -96,7 +96,7 @@ class Location:
         """
         res = engine.window.resolution
         w = res.width - box.w
-        h = int((res.height / 2) - (box.h / 2))
+        h = (res.height / 2) - (box.h / 2)
         return Location(w, h)
 
     @staticmethod
@@ -123,7 +123,7 @@ class Location:
         :return: A location corresponding to the bottom center of the window.
         """
         res = engine.window.resolution
-        w = int((res.width / 2) - (box.w / 2))
+        w = (res.width / 2) - (box.w / 2)
         h = res.height - box.h
         return Location(w, h)
 
@@ -171,7 +171,7 @@ class Location:
         h = bottom_rect.y - top_rect.h
         return Location(w, h)
 
-    def add(self, x: int = 0, y: int = 0) -> None:
+    def add(self, x: float = 0, y: float = 0) -> None:
         """
         Adds the given x and y amounts to the location.
 
@@ -182,7 +182,7 @@ class Location:
         self.x += x
         self.y += y
 
-    def sub(self, x: int = 0, y: int = 0) -> None:
+    def sub(self, x: float = 0, y: float = 0) -> None:
         """
         Subtracts the given x and y amounts from the location.
 
@@ -200,8 +200,8 @@ class Location:
         :param scalar: The scalar to multiply the location by.
         :return: None.
         """
-        self.x = int(self.x * scalar)
-        self.y = int(self.y * scalar)
+        self.x = self.x * scalar
+        self.y = self.y * scalar
 
     def dist(self, loc: 'Location') -> float:
         """
@@ -213,7 +213,7 @@ class Location:
         """
         return sqrt(self.dist_sqr(loc))
 
-    def dist_x(self, loc: 'Location') -> int:
+    def dist_x(self, loc: 'Location') -> float:
         """
         Gets the width difference between this location and another.
         The given difference will always be positive.
@@ -223,7 +223,7 @@ class Location:
         """
         return abs(self.x - loc.x)
 
-    def dist_y(self, loc: 'Location') -> int:
+    def dist_y(self, loc: 'Location') -> float:
         """
         Gets the height difference between this location and another.
         The given difference will always be positive.
@@ -255,7 +255,7 @@ class Location:
         y = round((self.y + loc.y) / 2)
         return Location(x, y)
 
-    def as_tuple(self) -> tuple[int, int]:
+    def as_tuple(self) -> tuple[float, float]:
         """
         Gets the current location as a tuple of two ints, the first being x and the second y.
 
@@ -263,7 +263,7 @@ class Location:
         """
         return self.x, self.y
 
-    def as_rect(self, width: int, height: int) -> Rect:
+    def as_rect(self, width: float, height: float) -> Rect:
         """
         Creates a `Rect` object with the current instance and the given width and height.
 

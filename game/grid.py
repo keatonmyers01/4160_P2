@@ -7,7 +7,8 @@ from engine.errors import BadArgument
 from engine.location import Location
 from engine.util import min_max
 from game.constants import CELL_SIZE
-from game.tower import Tower, CoreTower
+from game.tower import Tower
+from game.towers.core import CoreTower
 
 
 class Cell(Entity):

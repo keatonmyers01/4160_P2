@@ -71,7 +71,7 @@ class ArcherProjectile(Entity):
     def __init__(self, location: Location = Location(),
                  priority: int = 0,
                  *,
-                 velocity: tuple[int, int] = (0, 0),
+                 velocity: tuple[float, float] = (0, 0),
                  damage: int = 0):
         super().__init__(location, priority)
         self._velocity = velocity
@@ -81,7 +81,7 @@ class ArcherProjectile(Entity):
         self.color = (100, 100, 100)
 
     @property
-    def velocity(self) -> tuple[int, int]:
+    def velocity(self) -> tuple[float, float]:
         return self._velocity
 
     @velocity.setter

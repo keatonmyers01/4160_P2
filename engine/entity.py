@@ -12,7 +12,7 @@ from engine.color import WHITE
 from engine.location import Location
 from game.texture import Texture
 
-T = TypeVar('T', constraints='Entity', bound='Entity')
+T = T = TypeVar('T', bound='Entity')
 
 
 @total_ordering

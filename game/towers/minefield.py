@@ -34,7 +34,7 @@ class Minefield(Tower):
                 aoe_radius = 250
             case _:
                 raise EngineError()
-        velocity_seed = random.randint(0, max_velocity)
+        velocity_seed = random.uniform(0, max_velocity)
         x_mod = 1
         y_mod = 1
         if random.randint(0, 1):
@@ -85,7 +85,7 @@ class MinefieldProjectile(Entity):
     def __init__(self, location: Location = Location(),
                  priority: int = 0,
                  *,
-                 velocity: tuple[int, int] = (0, 0),
+                 velocity: tuple[float, float] = (0, 0),
                  damage: int = 0,
                  aoe_radius: int = 0,
                  life_span: float = 0):
@@ -100,11 +100,11 @@ class MinefieldProjectile(Entity):
         self._life_span = round(life_span * engine.window.fps)
 
     @property
-    def velocity(self) -> tuple[int, int]:
+    def velocity(self) -> tuple[float, float]:
         return self._velocity
 
     @velocity.setter
-    def velocity(self, value: tuple[int, int]):
+    def velocity(self, value: tuple[float, float]):
         self._velocity = value
 
     def tick(self, tick_count: int) -> None:

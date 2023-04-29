@@ -33,8 +33,8 @@ class GrapeShot(Tower):
                 raise EngineError('L')
         projectile_velocity = self.aquire_projectile_velocities(args[0], max_velocity)
         for i in range(projectile_count):
-            dx = projectile_velocity[0] + random.randint(-1, 1)
-            dy = projectile_velocity[1] + random.randint(-1, 1)
+            dx = projectile_velocity[0] + random.uniform(-0.5, 0.5)
+            dy = projectile_velocity[1] + random.uniform(-0.5, 0.5)
             projectile = GrapeShotProjectile(location=self.location.copy(), velocity=(dx, dy), damage=damage,
                                              priority=20 + i)
             engine.entity_handler.register_entity(projectile)
@@ -78,7 +78,7 @@ class GrapeShotProjectile(Entity):
     def __init__(self, location: Location = Location(),
                  priority: int = 0,
                  *,
-                 velocity: tuple[int, int] = (0, 0),
+                 velocity: tuple[float, float] = (0, 0),
                  damage: int = 0):
         super().__init__(location, priority)
         self._velocity = velocity
@@ -88,11 +88,11 @@ class GrapeShotProjectile(Entity):
         self.color = (150, 150, 150)
 
     @property
-    def velocity(self) -> tuple[int, int]:
+    def velocity(self) -> tuple[float, float]:
         return self._velocity
 
     @velocity.setter
-    def velocity(self, value: tuple[int, int]):
+    def velocity(self, value: tuple[float, float]):
         self._velocity = value
 
     def tick(self, tick_count: int) -> None:

@@ -142,15 +142,15 @@ class Tower(Entity):
             return
         self.on_cooldown = False
 
-    def aquire_projectile_velocities(self, target: Entity, max_velocity: int) -> tuple[int, int]:
+    def aquire_projectile_velocities(self, target: Entity, max_velocity: int) -> tuple[float, float]:
         orgin = self.location
         target_location = target.location
         x_distance = orgin.dist_x(target_location)
         y_distance = orgin.dist_y(target_location)
         total_distance = abs(y_distance) + abs(x_distance)
         distance_ratio = abs(x_distance / total_distance)
-        x_velocity = round(distance_ratio * max_velocity)
-        y_velocity = round((1 - distance_ratio) * max_velocity)
+        x_velocity = distance_ratio * max_velocity
+        y_velocity = (1 - distance_ratio) * max_velocity
         if x_distance < 0:
             x_velocity *= -1
         if y_distance < 0:
