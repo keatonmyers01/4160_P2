@@ -29,7 +29,7 @@ class Leach(Tower):
         targets = args[0].nearby_entities_type(radius, Enemy)
         for target in targets:
             target.damage(damage)
-            #TODO add in the healing
+            # TODO add in the healing
 
     def __init__(self):
         super().__init__()
@@ -61,4 +61,17 @@ class Leach(Tower):
         return 300
 
     def _on_upgrade(self, stage: TowerStage) -> None:
+        pass
+
+    @property
+    def max_health(self) -> int:
+        return 1000
+
+    def _on_damage(self) -> None:
+        pass
+
+    def _on_heal(self) -> None:
+        pass
+
+    def _on_death(self) -> None:
         pass

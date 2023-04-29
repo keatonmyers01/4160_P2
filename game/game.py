@@ -8,7 +8,6 @@ from engine.util import random_color
 from game.enemy import Enemy
 from game.grid import Grid
 from game.texture import Texture
-from game.towers.minefield import Minefield
 from game.towers.archer import Archer
 
 

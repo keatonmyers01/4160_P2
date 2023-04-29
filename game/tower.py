@@ -11,9 +11,7 @@ from game.enemy import Enemy
 from game.player import Player
 
 
-
 class EntityTargetType(Enum):
-
     ENEMY = 0,
     PLAYER = 1,
     TOWER = 2,
@@ -21,7 +19,6 @@ class EntityTargetType(Enum):
 
 
 class TowerStage(Enum):
-
     STAGE_1 = 1,
     STAGE_2 = 2,
     STAGE_3 = 3
@@ -36,7 +33,7 @@ class TowerStage(Enum):
                 return None
 
 
-class Tower(Entity):
+class Tower(LivingEntity):
 
     # this is an abstract class, so you'll need to create subclasses that extend Tower
 

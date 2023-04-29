@@ -71,6 +71,19 @@ class Healer(Tower):
     def _on_upgrade(self, stage: TowerStage) -> None:
         pass
 
+    @property
+    def max_health(self) -> int:
+        return 1000
+
+    def _on_damage(self) -> None:
+        pass
+
+    def _on_heal(self) -> None:
+        pass
+
+    def _on_death(self) -> None:
+        pass
+
 
 class HealerProjectile(Entity):
 
