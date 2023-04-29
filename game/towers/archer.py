@@ -64,6 +64,7 @@ class Archer(Tower):
 
     def _on_upgrade(self, stage: TowerStage) -> None:
         pass
+    
 
 
 class ArcherProjectile(Entity):

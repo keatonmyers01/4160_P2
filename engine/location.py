@@ -232,6 +232,28 @@ class Location:
         :return: The height difference between this location and another.
         """
         return abs(self.y - loc.y)
+    
+    def directional_dist_x(self, loc: 'Location') -> float:
+        """
+        Gets the width difference between this location and another.
+        The given difference will always be negitive if the loc object is left
+        of the self object.
+
+        :param loc: The other location.
+        :return: The width difference between this location and another.
+        """
+        return loc.x - self.x 
+
+    def directional_dist_y(self, loc: 'Location') -> float:
+        """
+        Gets the height difference between this location and another.
+        The given difference will always be negitive if the loc object is above
+        of the self object.
+
+        :param loc: The other location.
+        :return: The height difference between this location and another.
+        """
+        return loc.y - self.y
 
     def dist_sqr(self, loc: 'Location') -> float:
         """

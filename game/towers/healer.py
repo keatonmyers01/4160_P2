@@ -105,8 +105,8 @@ class HealerProjectile(Entity):
     def aquire_projectile_velocities(self, target: Entity, max_velocity: int) -> tuple[float, float]:
         orgin = self.location
         target_location = target.location
-        x_distance = orgin.dist_x(target_location)
-        y_distance = orgin.dist_y(target_location)
+        x_distance = orgin.directional_dist_x(target_location)
+        y_distance = orgin.directional_dist_y(target_location)
         total_distance = abs(y_distance) + abs(x_distance)
         distance_ratio = abs(x_distance / total_distance)
         x_velocity = distance_ratio * max_velocity

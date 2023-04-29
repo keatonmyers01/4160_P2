@@ -27,6 +27,7 @@ class CoreTower(Tower):
                 raise EngineError()
 
         projectile_velocity = self.aquire_projectile_velocities(args[0], max_velocity)
+        print(projectile_velocity)
         projectile = ArcherProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=damage,
                                       priority=20)
         engine.entity_handler.register_entity(projectile)
