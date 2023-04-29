@@ -1,7 +1,7 @@
 import uuid
 from abc import ABC, abstractmethod
 from functools import total_ordering
-from typing import Callable, Union, Type
+from typing import Callable, Union, Type, TypeVar
 
 import pygame.image
 from pygame import Surface, Rect, Color
@@ -11,6 +11,8 @@ import engine
 from engine.color import WHITE
 from engine.location import Location
 from game.texture import Texture
+
+T = TypeVar('T', constraints='Entity', bound='Entity')
 
 
 @total_ordering
@@ -264,7 +266,7 @@ class Entity(ABC):
         """
         return [e for e in engine.entity_handler.entities if e.location.dist(self.location) <= radius]
 
-    def nearby_entities_type(self, radius: float, t: Type['Entity']) -> list['Entity']:
+    def nearby_entities_type(self, radius: float, t: Type[T]) -> list[T]:
         """
         Gets a list of nearby entities within the given radius and of type t.
 
@@ -272,7 +274,7 @@ class Entity(ABC):
         :param t: The type of the entities to look for.
         :return: A list of nearby entities within the given radius and of type t.
         """
-        return [e for e in engine.entity_handler.entities if e._loc.dist(self._loc) <= radius and type(e) is t]
+        return [e for e in engine.entity_handler.entities if e._loc.dist(self._loc) <= radius and isinstance(e, t)]
 
     def nearest_entity(self) -> 'Entity | None':
         nearest: Entity | None = None
@@ -284,7 +286,7 @@ class Entity(ABC):
                 nearest = entity
         return nearest
 
-    def nearest_entity_type(self, t: Type['Entity']) -> 'Entity | None':
+    def nearest_entity_type(self, t: Type[T]) -> 'T | None':
         nearest: Entity | None = None
         for entity in engine.entity_handler.entities:
             if not isinstance(entity, t):

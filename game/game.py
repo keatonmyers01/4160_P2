@@ -8,7 +8,7 @@ from engine.util import random_color
 from game.enemy import Enemy
 from game.grid import Grid
 from game.texture import Texture
-from game.tower import Minefield
+from game.towers.minefield import Minefield
 
 
 class Game:  # Just gonna call it "Game" for now...
