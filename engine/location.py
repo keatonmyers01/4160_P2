@@ -41,7 +41,7 @@ class Location:
         :return: A location corresponding to the top center of the window.
         """
         res = engine.window.resolution
-        return Location((res.width / 2) - (box.w / 2)), 0
+        return Location((res.width / 2) - (box.w / 2), 0)
 
     @staticmethod
     def top_right(box: Rect) -> 'Location':
