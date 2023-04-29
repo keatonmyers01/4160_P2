@@ -5,10 +5,11 @@ from threading import Timer
 from pygame import Rect
 
 import engine
-from engine.entity import Entity
+from engine.entity import Entity, LivingEntity
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.player import Player
+
 
 
 class EntityTargetType(Enum):
@@ -35,7 +36,7 @@ class TowerStage(Enum):
                 return None
 
 
-class Tower(Entity):
+class Tower(LivingEntity):
 
     # this is an abstract class, so you'll need to create subclasses that extend Tower
 

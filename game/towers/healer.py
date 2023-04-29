@@ -123,9 +123,9 @@ class HealerProjectile(Entity):
             towers = self.nearby_entities_type(self.detect_range, Tower)
             min_tower_health = 100000
             for tower in towers:
-                if tower.heath < min_tower_health:
+                if tower.health < min_tower_health and tower.health > 0:
                     self.target = tower
-                    ##min_tower_health = tower.health
+                    min_tower_health = tower.health
         elif not self.onTarget:
             self.velocity = self.aquire_projectile_velocities(self.target, 5)
             self.location.add(self._velocity[0], self._velocity[1])
@@ -148,7 +148,7 @@ class HealerProjectile(Entity):
         return self.location.as_rect(self._radius, self._radius)
 
     def on_collide(self):
-        ##self.target.heal(min(self._healing_rate, self._health))
+        self.target.heal(min(self._healing_rate, self._health))
         self._health -= self._healing_rate
         if self._health <= 0:
             self.dispose()
