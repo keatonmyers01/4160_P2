@@ -15,35 +15,33 @@ from game.tower import Tower, TowerStage, EntityTargetType
 
 class GrapeShot(Tower):
 
-    def _on_ability(self, *args: Enemy) -> None:
-        match self.stage:
-            case TowerStage.STAGE_1:
-                projectile_count = 4
-                max_velocity = 5
-                damage = 20
-            case TowerStage.STAGE_2:
-                projectile_count = 6
-                max_velocity = 5
-                damage = 30
-            case TowerStage.STAGE_3:
-                projectile_count = 10
-                max_velocity = 5
-                damage = 45
-            case _:
-                raise EngineError('L')
-        projectile_velocity = self.aquire_projectile_velocities(args[0], max_velocity)
-        for i in range(projectile_count):
-            dx = projectile_velocity[0] + random.uniform(-0.5, 0.5)
-            dy = projectile_velocity[1] + random.uniform(-0.5, 0.5)
-            projectile = GrapeShotProjectile(location=self.location.copy(), velocity=(dx, dy), damage=damage,
-                                             priority=20 + i)
-            engine.entity_handler.register_entity(projectile)
-            projectile.spawn()
-
     def __init__(self):
         super().__init__()
         self.texture = pygame.image.load(Texture.CORE_TOWER.value)
         self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
+        self._building_cost = 45
+        self._max_velocity = 3
+
+        self._damage = 25
+        self._regeneration_rate = 0
+        self._starting_health = 350
+        self._max_health = 350
+        self._ability_cooldown = 1
+        self._health = self.starting_health
+        self._upgrade_cost = 65
+        self._area_of_effect = 150
+        self._projectile_count = 4
+
+
+    def _on_ability(self, *args: Enemy) -> None:
+        projectile_velocity = self.aquire_projectile_velocities(random.choice(args), self._max_velocity)
+        for i in range(self._projectile_count):
+            dx = projectile_velocity[0] + random.uniform(-0.5, 0.5)
+            dy = projectile_velocity[1] + random.uniform(-0.5, 0.5)
+            projectile = GrapeShotProjectile(location=self.location.copy(), velocity=(dx, dy), damage=self._damage,
+                                             priority=20 + i)
+            engine.entity_handler.register_entity(projectile)
+            projectile.spawn()
 
     def tick(self, tick_count: int) -> None:
         super().tick(tick_count)
@@ -70,11 +68,27 @@ class GrapeShot(Tower):
         return 250
 
     def _on_upgrade(self, stage: TowerStage) -> None:
-        pass
+        match stage:
+            case TowerStage.STAGE_2:
+                self._damage = 30
+                self._max_health = 425
+                self._health = 425
+                self._area_of_effect = 200
+                self._upgrade_cost = 90
+                self._projectile_count = 6
+                
+            case TowerStage.STAGE_3:
+                self._damage = 45
+                self._max_health = 500
+                self._health = 500
+                self._area_of_effect = 250
+                self._projectile_count = 10
+            case _:
+                raise EngineError()
 
     @property
     def max_health(self) -> int:
-        return 1000
+        return 350
 
     def _on_damage(self) -> None:
         pass

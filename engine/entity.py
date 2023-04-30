@@ -308,9 +308,11 @@ class LivingEntity(Entity):
                  velocity: tuple[int, int] = (0, 0)):
         super().__init__(location, priority)
         self._health = min(health, self.max_health)
+        self._max_health = self.max_health
         self._velocity = velocity
 
     def tick(self, tick_count: int) -> None:
+        print(self._health)
         if self._health <= 0:
             self._on_death()
             self.dispose()
@@ -322,7 +324,11 @@ class LivingEntity(Entity):
         self._on_damage()
 
     def heal(self, amount: int) -> None:
-        self._health = max(self.max_health, self._health + amount)
+        print(self._max_health)
+        print(self._health)
+        print(amount)
+        print((self._health + amount))
+        self._health = min(self._max_health, (self._health + amount))
         self._on_heal()
 
     @property

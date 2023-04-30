@@ -15,26 +15,27 @@ from game.tower import Tower, TowerStage, EntityTargetType
 
 class Minefield(Tower):
 
+    def __init__(self):
+        super().__init__()
+        self.texture = pygame.image.load(Texture.CORE_TOWER.value)
+        self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
+        self._building_cost = 0
+        self._max_velocity = 5
+
+        self._damage = 30
+        self._regeneration_rate = 0
+        self._starting_health = 300
+        self._max_health = 300
+        self._ability_cooldown = 2
+        self._health = self.starting_health
+        self._upgrade_cost = 70
+        self._area_of_effect = 150
+        self._max_velocity = 5
+        self._lifespan = 5
+        self._aoe_radius = 100
+
     def _on_ability(self, *args: Enemy | None) -> None:
-        match self.stage:
-            case TowerStage.STAGE_1:
-                damage = 30
-                max_velocity = 5
-                lifespan = 5
-                aoe_radius = 100
-            case TowerStage.STAGE_2:
-                damage = 40
-                max_velocity = 5
-                lifespan = 7
-                aoe_radius = 150
-            case TowerStage.STAGE_3:
-                damage = 60
-                max_velocity = 5
-                lifespan = 10
-                aoe_radius = 250
-            case _:
-                raise EngineError()
-        velocity_seed = random.uniform(0, max_velocity)
+        velocity_seed = random.uniform(0, self._max_velocity)
         x_mod = 1
         y_mod = 1
         if random.randint(0, 1):
@@ -42,15 +43,10 @@ class Minefield(Tower):
         if random.randint(0, 1):
             y_mod *= -1
         projectile_velocity = (velocity_seed * x_mod, (5 - velocity_seed) * y_mod)
-        projectile = MinefieldProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=damage,
-                                         priority=20, aoe_radius=aoe_radius, life_span=lifespan)
+        projectile = MinefieldProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=self._damage,
+                                         priority=20, aoe_radius=self._aoe_radius, life_span=self._lifespan)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
-
-    def __init__(self):
-        super().__init__()
-        self.texture = pygame.image.load(Texture.CORE_TOWER.value)
-        self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
 
     def tick(self, tick_count: int) -> None:
         super().tick(tick_count)
@@ -59,29 +55,46 @@ class Minefield(Tower):
         surface.blit(self.texture, self.location.as_tuple())
 
     def regeneration_rate(self) -> int:
-        return 0
+        return self._regeneration_rate
 
     def starting_health(self) -> int:
-        return 250
+        return self._starting_health
 
     def entity_target(self) -> EntityTargetType:
         return EntityTargetType.NONE
 
     def build_cost(self) -> int:
-        return 30
+        return self._building_cost
 
     def ability_cooldown(self) -> float:
-        return 1
+        return self._ability_cooldown
 
     def area_of_effect(self) -> int:
-        return 200
+        return self._area_of_effect
 
     def _on_upgrade(self, stage: TowerStage) -> None:
-        pass
+        match stage:
+            case TowerStage.STAGE_2:
+                self._damage = 45
+                self._max_health = 400
+                self._health = 400
+                self._area_of_effect = 125
+                self._upgrade_cost = 100
+                self._lifespan = 7
+                self._aoe_radius = 110
+            case TowerStage.STAGE_3:
+                self._damage = 70
+                self._max_health = 450
+                self._health = 450
+                self._area_of_effect = 150
+                self._lifespan = 10
+                self._aoe_radius = 115
+            case _:
+                raise EngineError()
 
     @property
     def max_health(self) -> int:
-        return 1000
+        return 300
 
     def _on_damage(self) -> None:
         pass

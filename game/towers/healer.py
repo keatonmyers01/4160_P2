@@ -13,36 +13,31 @@ from game.tower import Tower, TowerStage, EntityTargetType
 
 class Healer(Tower):
 
-    def _on_ability(self, *args: Enemy) -> None:
-        match self.stage:
-            case TowerStage.STAGE_1:
-                health = 30
-                healing_rate = 10
-                detect_range = 100
-                life_span = 10
-            case TowerStage.STAGE_2:
-                health = 60
-                healing_rate = 15
-                detect_range = 150
-                life_span = 10
-            case TowerStage.STAGE_3:
-                health = 100
-                healing_rate = 20
-                detect_range = 200
-                life_span = 10
-            case _:
-                raise EngineError()
-
-        projectile = HealerProjectile(location=self.location.copy(), velocity=(0, 0), health=health,
-                                      healing_rate=healing_rate, priority=20, detect_range=detect_range,
-                                      life_span=life_span)
-        engine.entity_handler.register_entity(projectile)
-        projectile.spawn()
-
     def __init__(self):
         super().__init__()
         self.texture = pygame.image.load(Texture.CORE_TOWER.value)
         self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
+        self._building_cost = 35
+
+        self._regeneration_rate = 3
+        self._starting_health = 300
+        self._max_health = 300
+        self._ability_cooldown = 1
+        self._health = self.starting_health
+        self._upgrade_cost = 60
+        self._area_of_effect = 0
+        self._detect_range = 300
+        self._life_span = 10
+        self._projectile_health = 30
+        self._healing_rate = 10
+
+    def _on_ability(self, *args: Enemy) -> None:
+
+        projectile = HealerProjectile(location=self.location.copy(), velocity=(0, 0), health=self._projectile_health,
+                                      healing_rate=self._healing_rate, priority=20, detect_range=self._detect_range,
+                                      life_span=self._life_span)
+        engine.entity_handler.register_entity(projectile)
+        projectile.spawn()
 
     def tick(self, tick_count: int) -> None:
         super().tick(tick_count)
@@ -50,30 +45,48 @@ class Healer(Tower):
     def draw(self, surface: Surface) -> None:
         surface.blit(self.texture, self.location.as_tuple())
 
+
     def regeneration_rate(self) -> int:
-        return 3
+        return self._regeneration_rate
 
     def starting_health(self) -> int:
-        return 200
+        return self._starting_health
 
     def entity_target(self) -> EntityTargetType:
         return EntityTargetType.NONE
 
     def build_cost(self) -> int:
-        return 30
+        return self._building_cost
 
     def ability_cooldown(self) -> float:
-        return 0
+        return self._ability_cooldown
 
     def area_of_effect(self) -> int:
-        return 1
+        return self._area_of_effect
 
     def _on_upgrade(self, stage: TowerStage) -> None:
-        pass
+        match stage:
+            case TowerStage.STAGE_2:
+                self._max_health = 400
+                self._health = 400
+                self._upgrade_cost = 80
+                self._detect_range = 130
+                self._life_span = 11
+                self._projectile_health = 60
+                self._healing_rate = 15
+            case TowerStage.STAGE_3:
+                self._max_health = 500
+                self._health = 500
+                self._detect_range = 150
+                self._life_span = 12
+                self._projectile_health = 100
+                self._healing_rate = 25
+            case _:
+                raise EngineError()
 
     @property
     def max_health(self) -> int:
-        return 1000
+        return 300
 
     def _on_damage(self) -> None:
         pass
@@ -101,7 +114,7 @@ class HealerProjectile(Entity):
         self._health = health
         self._healing_rate = healing_rate
         self._radius = 5
-        self.color = (100, 100, 100)
+        self.color = (0, 0, 0)
         self.detect_range = detect_range
         self.target = None
         self.onTarget = False
