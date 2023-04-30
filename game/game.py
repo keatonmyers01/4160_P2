@@ -30,7 +30,7 @@ class Game:  # Just gonna call it "Game" for now...
         self.grid = Grid(25, 17, core_at=(13, 9))
         self.grid.location = Location.center
         self.grid.cells[0][0].tower = Healer()
-        self.grid.cells[0][2].tower = Minefield()
+        self.grid.cells[0][2].tower = Leach()
         engine.entity_handler.register_entity(self.grid)
         engine.entity_handler.register_entity(self.bg)
         engine.entity_handler.dispose_offscreen_entities(True, pixels_offscreen=300)
