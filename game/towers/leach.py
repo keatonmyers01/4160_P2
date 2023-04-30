@@ -23,7 +23,7 @@ class Leach(Tower):
         self._starting_health = 200
         self._max_health = 200
         self._ability_cooldown = 4
-        self._health = self.starting_health
+        self._health = self._starting_health
         self._upgrade_cost = 80
         self._area_of_effect = 250
         self._healing = 5

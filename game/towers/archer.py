@@ -26,7 +26,7 @@ class Archer(Tower):
         self._starting_health = 100
         self._max_health = 200
         self._ability_cooldown = 1
-        self._health = self.starting_health
+        self._health = self._starting_health
         self._upgrade_cost = 30
         self._area_of_effect = 150
 

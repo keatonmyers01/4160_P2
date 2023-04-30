@@ -23,7 +23,7 @@ class Sniper(Tower):
         self._starting_health = 250
         self._max_health = 250
         self._ability_cooldown = 3
-        self._health = self.starting_health
+        self._health = self._starting_health
         self._upgrade_cost = 60
         self._area_of_effect = 400
 

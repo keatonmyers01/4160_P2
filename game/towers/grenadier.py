@@ -27,7 +27,7 @@ class Grenadier(Tower):
         self._starting_health = 300
         self._max_health = 300
         self._ability_cooldown = 2
-        self._health = self.starting_health
+        self._health = self._starting_health
         self._upgrade_cost = 80
         self._area_of_effect = 300
         self._aoe_radius = 50

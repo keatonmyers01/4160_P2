@@ -27,7 +27,7 @@ class ShrapnelCannon(Tower):
         self._starting_health = 350
         self._max_health = 350
         self._ability_cooldown = 2
-        self._health = self.starting_health
+        self._health = self._starting_health
         self._upgrade_cost = 50
         self._area_of_effect = 250
         self._secondary_count = 6
