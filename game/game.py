@@ -8,13 +8,8 @@ from engine.util import random_color
 from game.enemy import Enemy
 from game.grid import Grid
 from game.texture import Texture
-from game.towers.archer import Archer
-from game.towers.cannon import ShrapnelCannon
-from game.towers.grapeshot import GrapeShot
-from game.towers.grenadier import Grenadier
 from game.towers.healer import Healer
 from game.towers.leach import Leach
-from game.towers.minefield import Minefield
 
 
 class Game:  # Just gonna call it "Game" for now...
@@ -27,7 +22,7 @@ class Game:  # Just gonna call it "Game" for now...
         # - entity handler
         # - scheduler
         self.bg = TiledBackground(Texture.BRICK_WALL, (128, 128))
-        self.grid = Grid(25, 17, core_at=(13, 9))
+        self.grid = Grid(25, 17, core_at=(13, 8))
         self.grid.location = Location.center
         self.grid.cells[0][0].tower = Healer()
         self.grid.cells[0][2].tower = Leach()

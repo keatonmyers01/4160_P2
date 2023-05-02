@@ -8,11 +8,12 @@ from pygame import Surface, Rect, Color
 from pygame.font import Font
 
 import engine
-from engine.color import WHITE
+from engine.color import WHITE, RED, GREEN
 from engine.location import Location
+from engine.util import min_max
 from game.texture import Texture
 
-T = T = TypeVar('T', bound='Entity')
+T = TypeVar('T', bound='Entity')
 
 
 @total_ordering
@@ -299,35 +300,80 @@ class Entity(ABC):
         return nearest
 
 
+class HealthBar(Entity):
+
+    def __init__(self, entity: 'LivingEntity', *, w: int = 50, h: int = 6):
+        super().__init__()
+        self._entity = entity
+        self._w = w
+        self._h = h
+
+    def tick(self, tick_count: int) -> None:
+        self.location = Location.top_and_centered(self.bounds(), self._entity.bounds())
+        self.location.sub(y=5)
+
+    def draw(self, surface: Surface) -> None:
+        green_width = int((self._entity.health / self._entity.max_health) * self._w)
+        surface.fill(RED, self.location.as_rect(self._w, self._h))
+        surface.fill(GREEN, self.location.as_rect(green_width, self._h))
+
+    def bounds(self) -> Rect:
+        return self.location.as_rect(self._w, self._h)
+
+
 class LivingEntity(Entity):
 
     def __init__(self, location: Location = Location(),
                  priority: int = 0,
                  *,
-                 health: int = 0,
-                 velocity: tuple[int, int] = (0, 0)):
+                 health: int = 10,
+                 velocity: tuple[int, int] = (0, 0),
+                 health_bar: bool = False,
+                 bound_to_screen: bool = False):
         super().__init__(location, priority)
         self._health = min(health, self.max_health)
         self._max_health = self.max_health
         self._velocity = velocity
+        self._health_bar: HealthBar | None = HealthBar(self) if health_bar else None
+        self._bound_to_screen = bound_to_screen
+        self._invincible = False
+        self._invincible_frames = 0
 
     def tick(self, tick_count: int) -> None:
-        print(self._health)
+        self._health_bar.tick(tick_count)
         if self._health <= 0:
             self._on_death()
             self.dispose()
             return
-        self.location.add(self.velocity[0], self.velocity[1])
+        if self._invincible_frames > 0:
+            self._invincible_frames -= 1
+        if not self._bound_to_screen:
+            self.location.add(self.velocity[0], self.velocity[1])
+        else:
+            new_x = self.location.x + self.velocity[0]
+            new_y = self.location.y + self.velocity[1]
+            bounds = self.bounds()
+            resolution = engine.window.resolution
+            new_x = min_max(0, int(new_x), resolution.width - bounds.width)
+            new_y = min_max(0, int(new_y), resolution.height - bounds.height)
+            self.location.x = new_x
+            self.location.y = new_y
+
+    def draw(self, surface: Surface) -> None:
+        self._health_bar.draw(surface)
+
+    def dispose(self) -> None:
+        super().dispose()
+        if self._health_bar:
+            self._health_bar.dispose()
 
     def damage(self, amount: int) -> None:
+        if self._invincible or self._invincible_frames > 0:
+            return
         self._health -= amount
         self._on_damage()
 
     def heal(self, amount: int) -> None:
-        print(self._max_health)
-        print(self._health)
-        print(amount)
-        print((self._health + amount))
         self._health = min(self._max_health, (self._health + amount))
         self._on_heal()
 
@@ -348,6 +394,22 @@ class LivingEntity(Entity):
         if value <= 0:
             self._health = 0
             self._on_death()
+
+    @property
+    def invincible(self) -> bool:
+        return self._invincible
+
+    @invincible.setter
+    def invincible(self, value: bool) -> None:
+        self._invincible = value
+
+    @property
+    def invincible_frames(self) -> int:
+        return self._invincible_frames
+
+    @invincible_frames.setter
+    def invincible_frames(self, value: int) -> None:
+        self._invincible_frames = max(0, value)
 
     @property
     @abstractmethod

@@ -161,11 +161,11 @@ class Location:
     @staticmethod
     def top_and_centered(top_rect: Rect, bottom_rect: Rect) -> 'Location':
         """
+        Returns a location for `top_rect` that corresponds to above and center of the `bottom_rect`.
 
-
-        :param top_rect:
-        :param bottom_rect:
-        :return:
+        :param top_rect: The rect to be displayed above and centered compared to the bottom_rect.
+        :param bottom_rect: The rect to be displayed below the top_rect.
+        :return: A location for `top_rect` that corresponds to above and center of the `bottom_rect`.
         """
         w = bottom_rect.x + (bottom_rect.w / 2) - (top_rect.w / 2)
         h = bottom_rect.y - top_rect.h

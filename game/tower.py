@@ -6,6 +6,7 @@ from pygame import Rect
 
 import engine
 from engine.entity import Entity, LivingEntity
+from engine.sprite import Sprite, SPRITE_STATE
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.player import Player
@@ -33,12 +34,18 @@ class TowerStage(Enum):
                 return None
 
 
-class Tower(LivingEntity):
+class TowerState(Enum):
+
+    IDLE = 0
+    PERFORMING_ABILITY = 1
+
+
+class Tower(Sprite):
 
     # this is an abstract class, so you'll need to create subclasses that extend Tower
 
     def __init__(self, *, stage: TowerStage = TowerStage.STAGE_1):
-        super().__init__()
+        super().__init__(TowerState.IDLE, priority=30, health_bar=True)
         self.on_cooldown = True
         self._regeneration_rate = 0
         self._starting_health = 0
