@@ -21,7 +21,6 @@ class Minefield(Tower):
         self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
         self._building_cost = 0
         self._max_velocity = 5
-
         self._damage = 30
         self._regeneration_rate = 0
         self._starting_health = 300
@@ -43,16 +42,11 @@ class Minefield(Tower):
         if random.randint(0, 1):
             y_mod *= -1
         projectile_velocity = (velocity_seed * x_mod, (5 - velocity_seed) * y_mod)
-        projectile = MinefieldProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=self._damage,
-                                         priority=20, aoe_radius=self._aoe_radius, life_span=self._lifespan)
+        projectile = MinefieldProjectile(location=self.location.copy(), velocity=projectile_velocity,
+                                         damage=self._damage, priority=20, aoe_radius=self._aoe_radius,
+                                         life_span=self._lifespan)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
-
-    def tick(self, tick_count: int) -> None:
-        super().tick(tick_count)
-
-    def draw(self, surface: Surface) -> None:
-        surface.blit(self.texture, self.location.as_tuple())
 
     def regeneration_rate(self) -> int:
         return self._regeneration_rate

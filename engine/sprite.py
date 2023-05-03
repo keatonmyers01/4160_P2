@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from enum import Enum
-from typing import TypeVar, Callable, Any
+from typing import TypeVar, Callable
 
 import pygame.image
 from pygame import Rect, Surface
@@ -69,7 +69,7 @@ class Sprite(LivingEntity):
         if len(self._animations) == 0:
             raise EngineError('Sprite spawned with 0 animations.')
 
-    def _add_state(self, state: SPRITE_STATE, path: str, frame_count: int) -> None:
+    def add_state(self, state: SPRITE_STATE, path: str, frame_count: int) -> None:
         """
         Adds the given state with the given path and frame count to the sprite.
 
@@ -82,7 +82,7 @@ class Sprite(LivingEntity):
             raise EngineError(f'The sprite state {state.name} has already been set.')
         images = []
         for i in range(frame_count):
-            image = pygame.image.load(f'{path}/{i}.png')
+            image = pygame.image.load(f'{path}/{state.value}/{i}.png')
             new_width = image.get_width() * self._scalar
             new_height = image.get_height() * self._scalar
             image = pygame.transform.scale(image, (new_width, new_height))
@@ -90,7 +90,7 @@ class Sprite(LivingEntity):
         self._animations[state] = images
         self._states[state] = (path, frame_count)
 
-    def _queue_state(self, state: SPRITE_STATE, callback: Callable[[], None], *, loops: int = 1) -> None:
+    def queue_state(self, state: SPRITE_STATE, callback: Callable[[], None], *, loops: int = 1) -> None:
         """
         Sets the given sprite state and waits until the given
         number of loops has passed until calling the given callback.
@@ -102,7 +102,11 @@ class Sprite(LivingEntity):
         :param loops: The number of loops of the animation to play.
         :return: None
         """
-        pass
+        if loops < 1:
+            raise EngineError('Cannot queue state change with loops < 1.')
+        self._state_change = StateChange(self._state, callback=callback, loops=loops)
+        self._state = state
+        self._frame_index = 0
 
     @property
     def state(self) -> SPRITE_STATE:
@@ -111,6 +115,7 @@ class Sprite(LivingEntity):
     @state.setter
     def state(self, value: SPRITE_STATE) -> None:
         self._state = value
+        self._frame_index = 0
         if self._state_change:
             self._state_change = None
 

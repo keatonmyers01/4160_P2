@@ -6,7 +6,7 @@ import engine
 from engine.entity import Entity
 from engine.errors import BadArgument
 from engine.location import Location
-from engine.util import min_max
+from engine.util import min_max, random_color
 from game.constants import CELL_SIZE
 from game.tower import Tower
 from game.towers.core import CoreTower
@@ -29,7 +29,7 @@ class Cell(Entity):
         if self._tower:
             self._tower.draw(surface)
         else:
-            surface.fill((64, 64, 64), self.bounds())
+            surface.fill(random_color(), self.bounds())
 
     def bounds(self) -> Rect:
         return self.location.as_rect(CELL_SIZE[0], CELL_SIZE[1])

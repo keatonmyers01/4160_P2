@@ -10,7 +10,7 @@ from engine.location import Location
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType
+from game.tower import Tower, TowerStage, EntityTargetType, aquire_projectile_velocities
 
 
 class Grenadier(Tower):
@@ -33,23 +33,11 @@ class Grenadier(Tower):
         self._aoe_radius = 50
 
     def _on_ability(self, *args: Enemy) -> None:
-        projectile_velocity = self.aquire_projectile_velocities(random.choice(args), self._max_velocity)
-        projectile = GrenadierProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=self._damage,
-                                         priority=20, aoe_radius=self._aoe_radius)
+        projectile_velocity = aquire_projectile_velocities(self, random.choice(args), self._max_velocity)
+        projectile = GrenadierProjectile(location=self.location.copy(), velocity=projectile_velocity,
+                                         damage=self._damage, priority=20, aoe_radius=self._aoe_radius)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
-
-    def tick(self, tick_count: int) -> None:
-        super().tick(tick_count)
-
-    def draw(self, surface: Surface) -> None:
-        surface.blit(self.texture, self.location.as_tuple())
-
-    def tick(self, tick_count: int) -> None:
-        super().tick(tick_count)
-
-    def draw(self, surface: Surface) -> None:
-        surface.blit(self._texture, self.location.as_tuple())
 
     def regeneration_rate(self) -> int:
         return self._regeneration_rate

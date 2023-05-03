@@ -5,8 +5,8 @@ from threading import Timer
 from pygame import Rect
 
 import engine
-from engine.entity import Entity, LivingEntity
-from engine.sprite import Sprite, SPRITE_STATE
+from engine.entity import Entity
+from engine.sprite import Sprite
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.player import Player
@@ -36,37 +36,42 @@ class TowerStage(Enum):
 
 class TowerState(Enum):
 
-    IDLE = 0
-    PERFORMING_ABILITY = 1
+    IDLE = 'idle'
+    PERFORMING_ABILITY = 'anim'
 
 
 class Tower(Sprite):
 
     # this is an abstract class, so you'll need to create subclasses that extend Tower
 
-    def __init__(self, *, stage: TowerStage = TowerStage.STAGE_1):
-        super().__init__(TowerState.IDLE, priority=30, health_bar=True)
+    def __init__(self,
+                 *,
+                 scalar: float = 1,
+                 ticks_per_frame: int = 1,
+                 stage: TowerStage = TowerStage.STAGE_1):
+        super().__init__(TowerState.IDLE, scalar=scalar, ticks_per_frame=ticks_per_frame, priority=30, health_bar=True)
         self.on_cooldown = True
         self._regeneration_rate = 0
         self._starting_health = 0
         self._building_cost = 0
         self._ability_cooldown = 0
         self._area_of_effect = 0
-        self.ability_timer = Timer(self.ability_cooldown(), self.perform_ability)
+        self._ability_timer = Timer(self.ability_cooldown(), self.perform_ability)
         self._stage = stage
 
     def __del__(self):
-        if self.ability_timer.is_alive():
-            self.ability_timer.cancel()
-            self.ability_timer.join(1)
+        if self._ability_timer.is_alive():
+            self._ability_timer.cancel()
+            self._ability_timer.join(1)
 
     def _on_load(self) -> None:
-        self.ability_timer.start()
+        self._ability_timer.start()
 
     def _on_dispose(self) -> None:
         self.__del__()
 
     def tick(self, tick_count: int) -> None:
+        super().tick(tick_count)
         if not self.on_cooldown:
             self.perform_ability()
 
@@ -140,25 +145,35 @@ class Tower(Sprite):
             case EntityTargetType.PLAYER:
                 targets = engine.entity_handler.get_entities(Player)
         if len(targets) > 0 or self.entity_target() is EntityTargetType.NONE:
+            self.queue_state(TowerState.PERFORMING_ABILITY, self._post_ability)
             self._on_ability(*targets)
             self.on_cooldown = True
-            self.ability_timer = Timer(self.ability_cooldown(), self.perform_ability)
-            self.ability_timer.start()
             return
         self.on_cooldown = False
 
-    def aquire_projectile_velocities(self, target: Entity, max_velocity: int) -> tuple[float, float]:
-        orgin = self.location
-        target_location = target.location
-        x_distance = orgin.directional_dist_x(target_location)
-        y_distance = orgin.directional_dist_y(target_location)
-        total_distance = abs(y_distance) + abs(x_distance)
-        distance_ratio = abs(x_distance / total_distance)
-        x_velocity = distance_ratio * max_velocity
-        y_velocity = (1 - distance_ratio) * max_velocity
-        if x_distance < 0:
-            x_velocity *= -1
-        if y_distance < 0:
-            y_velocity *= -1
+    def _post_ability(self) -> None:
+        """
+        Private method used to reset the ability timer of the tower after their ability has been performed.
+        Used due to having to wait for the full animation to play out before resetting the timer.
 
-        return x_velocity, y_velocity
+        :return: None
+        """
+        self._ability_timer = Timer(self.ability_cooldown(), self.perform_ability)
+        self._ability_timer.start()
+
+
+def aquire_projectile_velocities(self: Entity, target: Entity, max_velocity: int) -> tuple[float, float]:
+    orgin = self.location
+    target_location = target.location
+    x_distance = orgin.directional_dist_x(target_location)
+    y_distance = orgin.directional_dist_y(target_location)
+    total_distance = abs(y_distance) + abs(x_distance)
+    distance_ratio = abs(x_distance / total_distance)
+    x_velocity = distance_ratio * max_velocity
+    y_velocity = (1 - distance_ratio) * max_velocity
+    if x_distance < 0:
+        x_velocity *= -1
+    if y_distance < 0:
+        y_velocity *= -1
+
+    return x_velocity, y_velocity

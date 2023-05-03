@@ -327,7 +327,7 @@ class LivingEntity(Entity):
                  priority: int = 0,
                  *,
                  health: int = 10,
-                 velocity: tuple[int, int] = (0, 0),
+                 velocity: tuple[float, float] = (0, 0),
                  health_bar: bool = False,
                  bound_to_screen: bool = False):
         super().__init__(location, priority)
@@ -340,7 +340,8 @@ class LivingEntity(Entity):
         self._invincible_frames = 0
 
     def tick(self, tick_count: int) -> None:
-        self._health_bar.tick(tick_count)
+        if self._health_bar:
+            self._health_bar.tick(tick_count)
         if self._health <= 0:
             self._on_death()
             self.dispose()
@@ -360,7 +361,13 @@ class LivingEntity(Entity):
             self.location.y = new_y
 
     def draw(self, surface: Surface) -> None:
-        self._health_bar.draw(surface)
+        if self._health_bar:
+            self._health_bar.draw(surface)
+
+    def spawn(self) -> None:
+        super().spawn()
+        if self._health_bar:
+            self._health_bar.spawn()
 
     def dispose(self) -> None:
         super().dispose()
@@ -378,11 +385,11 @@ class LivingEntity(Entity):
         self._on_heal()
 
     @property
-    def velocity(self) -> tuple[int, int]:
+    def velocity(self) -> tuple[float, float]:
         return self._velocity
 
     @velocity.setter
-    def velocity(self, value: tuple[int, int]) -> None:
+    def velocity(self, value: tuple[float, float]) -> None:
         self._velocity = value
 
     @property

@@ -8,7 +8,7 @@ from engine.location import Location
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType
+from game.tower import Tower, TowerStage, EntityTargetType, aquire_projectile_velocities
 
 
 class Healer(Tower):
@@ -44,7 +44,6 @@ class Healer(Tower):
 
     def draw(self, surface: Surface) -> None:
         surface.blit(self.texture, self.location.as_tuple())
-
 
     def regeneration_rate(self) -> int:
         return self._regeneration_rate
@@ -128,32 +127,16 @@ class HealerProjectile(Entity):
     def velocity(self, value: tuple[float, float]):
         self._velocity = value
 
-    def aquire_projectile_velocities(self, target: Entity, max_velocity: int) -> tuple[float, float]:
-        orgin = self.location
-        target_location = target.location
-        x_distance = orgin.directional_dist_x(target_location)
-        y_distance = orgin.directional_dist_y(target_location)
-        total_distance = abs(y_distance) + abs(x_distance)
-        distance_ratio = abs(x_distance / total_distance)
-        x_velocity = distance_ratio * max_velocity
-        y_velocity = (1 - distance_ratio) * max_velocity
-        if x_distance < 0:
-            x_velocity *= -1
-        if y_distance < 0:
-            y_velocity *= -1
-
-        return x_velocity, y_velocity
-
     def tick(self, tick_count: int) -> None:
         if self.target is None:
             towers = self.nearby_entities_type(self.detect_range, Tower)
             min_tower_health = 100000
             for tower in towers:
-                if tower.health < min_tower_health and tower.health > 0:
+                if min_tower_health > tower.health > 0:
                     self.target = tower
                     min_tower_health = tower.health
         elif not self.onTarget:
-            self.velocity = self.aquire_projectile_velocities(self.target, 5)
+            self.velocity = aquire_projectile_velocities(self, self.target, 5)
             self.location.add(self._velocity[0], self._velocity[1])
             collisions = self.nearby_entities_type(self._radius, Tower)
             if self.target in collisions:

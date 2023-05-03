@@ -17,7 +17,6 @@ class Sniper(Tower):
         self.texture = pygame.image.load(Texture.CORE_TOWER.value)
         self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
         self._building_cost = 40
-
         self._damage = 200
         self._regeneration_rate = 0
         self._starting_health = 250
@@ -29,12 +28,6 @@ class Sniper(Tower):
 
     def _on_ability(self, *args: Enemy) -> None:
         random.choice(args).damage(self._damage)
-
-    def tick(self, tick_count: int) -> None:
-        super().tick(tick_count)
-
-    def draw(self, surface: Surface) -> None:
-        surface.blit(self.texture, self.location.as_tuple())
 
     def regeneration_rate(self) -> int:
         return self._regeneration_rate

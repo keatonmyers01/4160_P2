@@ -1,26 +1,20 @@
-import pygame
-from pygame import Surface
-
 import random
 
 import engine
 from engine import EngineError
-from game.constants import CELL_SIZE
 from game.enemy import Enemy
-from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType
+from game.tower import Tower, TowerStage, EntityTargetType, TowerState
 from game.towers.archer import ArcherProjectile
 
 
 class CoreTower(Tower):
 
     def __init__(self):
-        super().__init__()
-        self._texture = pygame.image.load(Texture.CORE_TOWER.value)
-        self._texture = pygame.transform.scale(self._texture, CELL_SIZE)
+        super().__init__(scalar=0.4, ticks_per_frame=4)
+        self.add_state(TowerState.IDLE, 'game/asset/tower/core', 1)
+        self.add_state(TowerState.PERFORMING_ABILITY, 'game/asset/tower/core', 8)
         self._building_cost = 0
         self._max_velocity = 8
-
         self._damage = 40
         self._regeneration_rate = 1
         self._starting_health = 1000
@@ -29,7 +23,6 @@ class CoreTower(Tower):
         self._health = self._starting_health
         self._upgrade_cost = 100
         self._area_of_effect = 150
-        
 
     def _on_ability(self, *args: Enemy) -> None:
         projectile_velocity = self.aquire_projectile_velocities(random.choice(args), self._max_velocity)
@@ -37,12 +30,6 @@ class CoreTower(Tower):
                                       priority=20)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
-
-    def tick(self, tick_count: int) -> None:
-        super().tick(tick_count)
-
-    def draw(self, surface: Surface) -> None:
-        surface.blit(self._texture, self.location.as_tuple())
 
     def regeneration_rate(self) -> int:
         return self._regeneration_rate

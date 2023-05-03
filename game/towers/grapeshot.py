@@ -10,7 +10,7 @@ from engine.location import Location
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType
+from game.tower import Tower, TowerStage, EntityTargetType, aquire_projectile_velocities
 
 
 class GrapeShot(Tower):
@@ -32,9 +32,8 @@ class GrapeShot(Tower):
         self._area_of_effect = 150
         self._projectile_count = 4
 
-
     def _on_ability(self, *args: Enemy) -> None:
-        projectile_velocity = self.aquire_projectile_velocities(random.choice(args), self._max_velocity)
+        projectile_velocity = aquire_projectile_velocities(self, random.choice(args), self._max_velocity)
         for i in range(self._projectile_count):
             dx = projectile_velocity[0] + random.uniform(-0.5, 0.5)
             dy = projectile_velocity[1] + random.uniform(-0.5, 0.5)

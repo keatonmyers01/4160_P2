@@ -17,7 +17,6 @@ class Leach(Tower):
         self.texture = pygame.image.load(Texture.CORE_TOWER.value)
         self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
         self._building_cost = 40
-
         self._damage = 20
         self._regeneration_rate = -1
         self._starting_health = 200

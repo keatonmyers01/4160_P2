@@ -10,7 +10,7 @@ from engine.location import Location
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType
+from game.tower import Tower, TowerStage, EntityTargetType, aquire_projectile_velocities
 
 
 class ShrapnelCannon(Tower):
@@ -33,9 +33,9 @@ class ShrapnelCannon(Tower):
         self._secondary_count = 6
 
     def _on_ability(self, *args: Enemy) -> None:
-        projectile_velocity = self.aquire_projectile_velocities(random.choice(args), self._max_velocity)
-        projectile = ShrapnelProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=self._damage,
-                                        priority=20, secondary_count=self._secondary_count)
+        projectile_velocity = aquire_projectile_velocities(self, random.choice(args), self._max_velocity)
+        projectile = ShrapnelProjectile(location=self.location.copy(), velocity=projectile_velocity,
+                                        damage=self._damage, priority=20, secondary_count=self._secondary_count)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
 
@@ -44,6 +44,7 @@ class ShrapnelCannon(Tower):
 
     def draw(self, surface: Surface) -> None:
         surface.blit(self.texture, self.location.as_tuple())
+
     def regeneration_rate(self) -> int:
         return self._regeneration_rate
 
@@ -184,14 +185,15 @@ class ShrapnelProjectile(Entity):
         for i in range(self._secondary_count):
             x_velocity = 0
             y_velocity = 0
-            while(abs(x_velocity) + abs(y_velocity) < 5):
+            while abs(x_velocity) + abs(y_velocity) < 5:
                 x_velocity = random.uniform(0, 5)
                 y_velocity = random.uniform(0, 5)
                 if random.randint(0, 1):
                     x_velocity *= -1
                 if random.randint(0, 1):
                     y_velocity *= -1
-                projectile_velocity = (x_velocity, y_velocity)
+
+            projectile_velocity = (x_velocity, y_velocity)
 
             projectile = ShrapnelProjectileSecondary(location=self.location.copy(),
                                                      velocity=projectile_velocity,
