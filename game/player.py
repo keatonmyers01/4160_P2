@@ -140,6 +140,11 @@ class Player(Sprite):
                 self._velocity = (current_velocity[0], 0)
             case pygame.K_d:
                 self._velocity = (0, current_velocity[1])
+
+        keys_pressed = pygame.key.get_pressed()
+        if True in keys_pressed:
+            print(keys_pressed)
+
         action = PlayerAction.WALK if self.is_moving else PlayerAction.IDLE
         self.state = PlayerState.bind(action, self._rotation)
 
