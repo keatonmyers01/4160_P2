@@ -1,37 +1,29 @@
 import random
 
-import pygame
 from pygame import Surface, Rect
 
 import engine
 from engine.entity import Entity, LivingEntity
 from engine.location import Location
-from game.constants import CELL_SIZE
 from game.enemy import Enemy
-from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType, aquire_projectile_velocities
+from game.tower import Tower, TowerStage, EntityTargetType, calculate_projectile_vel
 
 
 class GrapeShot(Tower):
 
     def __init__(self):
         super().__init__()
-        self.texture = pygame.image.load(Texture.CORE_TOWER.value)
-        self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
         self._building_cost = 45
         self._max_velocity = 3
         self._damage = 25
         self._regeneration_rate = 0
-        self._starting_health = 350
-        self._max_health = 350
         self._ability_cooldown = 1
-        self._health = self._starting_health
         self._upgrade_cost = 65
         self._area_of_effect = 150
         self._projectile_count = 4
 
     def _on_ability(self, *args: Enemy) -> None:
-        projectile_velocity = aquire_projectile_velocities(self, random.choice(args), self._max_velocity)
+        projectile_velocity = calculate_projectile_vel(self, random.choice(args), self._max_velocity)
         for i in range(self._projectile_count):
             dx = projectile_velocity[0] + random.uniform(-0.5, 0.5)
             dy = projectile_velocity[1] + random.uniform(-0.5, 0.5)
@@ -47,15 +39,12 @@ class GrapeShot(Tower):
         match stage:
             case TowerStage.STAGE_2:
                 self._damage = 30
-                self._max_health = 425
                 self._health = 425
                 self._area_of_effect = 200
                 self._upgrade_cost = 90
                 self._projectile_count = 6
-                
             case TowerStage.STAGE_3:
                 self._damage = 45
-                self._max_health = 500
                 self._health = 500
                 self._area_of_effect = 250
                 self._projectile_count = 10

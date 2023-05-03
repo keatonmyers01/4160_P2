@@ -58,6 +58,7 @@ class Sprite(LivingEntity):
             self._tick_index = self._ticks_per_frame
 
     def draw(self, surface: Surface) -> None:
+        super().draw(surface)
         surface.blit(self._animations[self._state][self._frame_index], self.location.as_tuple())
 
     def bounds(self) -> Rect:

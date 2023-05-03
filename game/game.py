@@ -8,6 +8,7 @@ from engine.util import random_color
 from game.constants import BG_TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, FRAMES_PER_SECOND, PIXELS_OFFSCREEN_BOUNDARY
 from game.enemy import Enemy
 from game.grid import Grid
+from game.player import Player
 from game.texture import Texture
 
 
@@ -17,9 +18,9 @@ class Game:  # Just gonna call it "Game" for now...
         engine.init(fps=FRAMES_PER_SECOND)
         self.bg = TiledBackground(Texture.BRICK_WALL, BG_TILE_SIZE)
         self.grid = Grid(GRID_WIDTH, GRID_HEIGHT, core_at=(GRID_WIDTH // 2, GRID_HEIGHT // 2))
+        self.player = Player()
         self.grid.location = Location.center
-        engine.entity_handler.register_entity(self.grid)
-        engine.entity_handler.register_entity(self.bg)
+        engine.entity_handler.register_entities(self.grid, self.bg, self.player)
         engine.entity_handler.dispose_offscreen_entities(True, pixels_offscreen=PIXELS_OFFSCREEN_BOUNDARY)
         engine.event_handler.register(pygame.QUIT, self.on_quit)  # registering an event
         engine.event_handler.register(pygame.MOUSEBUTTONDOWN, self.on_left_click)

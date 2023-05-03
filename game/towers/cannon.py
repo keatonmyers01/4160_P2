@@ -9,7 +9,7 @@ from engine.location import Location
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType, aquire_projectile_velocities
+from game.tower import Tower, TowerStage, EntityTargetType, calculate_projectile_vel
 
 
 class ShrapnelCannon(Tower):
@@ -20,19 +20,16 @@ class ShrapnelCannon(Tower):
         self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
         self._building_cost = 40
         self._max_velocity = 3
-
         self._damage = 15
         self._regeneration_rate = 0
-        self._starting_health = 350
         self._max_health = 350
         self._ability_cooldown = 2
-        self._health = self._starting_health
         self._upgrade_cost = 50
         self._area_of_effect = 250
         self._secondary_count = 6
 
     def _on_ability(self, *args: Enemy) -> None:
-        projectile_velocity = aquire_projectile_velocities(self, random.choice(args), self._max_velocity)
+        projectile_velocity = calculate_projectile_vel(self, random.choice(args), self._max_velocity)
         projectile = ShrapnelProjectile(location=self.location.copy(), velocity=projectile_velocity,
                                         damage=self._damage, priority=20, secondary_count=self._secondary_count)
         engine.entity_handler.register_entity(projectile)

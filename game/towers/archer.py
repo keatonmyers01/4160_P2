@@ -1,37 +1,29 @@
 import random
 
-import pygame
 from pygame import Surface, Rect
 
 import engine
 from engine.entity import Entity, LivingEntity
 from engine.location import Location
-from game.constants import CELL_SIZE
 from game.enemy import Enemy
-from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType, aquire_projectile_velocities
+from game.tower import Tower, TowerStage, EntityTargetType, calculate_projectile_vel
 
 
 class Archer(Tower):
 
     def __init__(self):
         super().__init__()
-        self.texture = pygame.image.load(Texture.CORE_TOWER.value)
-        self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
         self._building_cost = 30
         self._max_velocity = 5
-
         self._damage = 20
         self._regeneration_rate = 0
-        self._starting_health = 100
         self._max_health = 200
         self._ability_cooldown = 1
-        self._health = self._starting_health
         self._upgrade_cost = 30
         self._area_of_effect = 150
 
     def _on_ability(self, *args: Enemy) -> None:
-        projectile_velocity = aquire_projectile_velocities(self, random.choice(args), self._max_velocity)
+        projectile_velocity = calculate_projectile_vel(self, random.choice(args), self._max_velocity)
         projectile = ArcherProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=self._damage,
                                       priority=20)
         engine.entity_handler.register_entity(projectile)

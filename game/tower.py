@@ -164,7 +164,7 @@ class Tower(Sprite):
         self._ability_timer.start()
 
 
-def aquire_projectile_velocities(self: Entity, target: Entity, max_velocity: int) -> tuple[float, float]:
+def calculate_projectile_vel(self: Entity, target: Entity, max_velocity: int) -> tuple[float, float]:
     orgin = self.location
     target_location = target.location
     x_distance = orgin.directional_dist_x(target_location)

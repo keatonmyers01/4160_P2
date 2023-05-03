@@ -355,8 +355,8 @@ class LivingEntity(Entity):
             new_y = self.location.y + self.velocity[1]
             bounds = self.bounds()
             resolution = engine.window.resolution
-            new_x = min_max(0, int(new_x), resolution.width - bounds.width)
-            new_y = min_max(0, int(new_y), resolution.height - bounds.height)
+            new_x = min_max(int(new_x), 0, resolution.width - bounds.width)
+            new_y = min_max(int(new_y), 0, resolution.height - bounds.height)
             self.location.x = new_x
             self.location.y = new_y
 
@@ -383,6 +383,10 @@ class LivingEntity(Entity):
     def heal(self, amount: int) -> None:
         self._health = min(self._max_health, (self._health + amount))
         self._on_heal()
+
+    @property
+    def is_moving(self) -> bool:
+        return self._velocity[0] != 0 or self._velocity[1] != 0
 
     @property
     def velocity(self) -> tuple[float, float]:

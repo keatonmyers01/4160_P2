@@ -1,14 +1,11 @@
 import random
 
-import pygame
 from pygame import Surface, Rect
 
 import engine
 from engine.entity import Entity
 from engine.location import Location
-from game.constants import CELL_SIZE
 from game.enemy import Enemy
-from game.texture import Texture
 from game.tower import Tower, TowerStage, EntityTargetType
 
 
@@ -16,16 +13,11 @@ class Minefield(Tower):
 
     def __init__(self):
         super().__init__()
-        self.texture = pygame.image.load(Texture.CORE_TOWER.value)
-        self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
         self._building_cost = 0
         self._max_velocity = 5
         self._damage = 30
         self._regeneration_rate = 0
-        self._starting_health = 300
-        self._max_health = 300
         self._ability_cooldown = 2
-        self._health = self._starting_health
         self._upgrade_cost = 70
         self._area_of_effect = 150
         self._max_velocity = 5
@@ -54,7 +46,6 @@ class Minefield(Tower):
         match stage:
             case TowerStage.STAGE_2:
                 self._damage = 45
-                self._max_health = 400
                 self._health = 400
                 self._area_of_effect = 125
                 self._upgrade_cost = 100
@@ -62,7 +53,6 @@ class Minefield(Tower):
                 self._aoe_radius = 110
             case TowerStage.STAGE_3:
                 self._damage = 70
-                self._max_health = 450
                 self._health = 450
                 self._area_of_effect = 150
                 self._lifespan = 10

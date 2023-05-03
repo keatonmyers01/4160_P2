@@ -1,5 +1,6 @@
 from typing import Callable, Union
 
+import pygame.image
 from pygame import Rect, Surface
 
 import engine
@@ -7,6 +8,7 @@ from engine.entity import Entity
 from engine.errors import BadArgument
 from engine.location import Location
 from game.constants import CELL_SIZE
+from game.texture import Texture
 from game.tower import Tower
 from game.towers.core import CoreTower
 
@@ -19,16 +21,17 @@ class Cell(Entity):
         self._y = y
         self._grid = grid
         self._tower = tower
+        texture = pygame.image.load(Texture.CELL.value)
+        self._texture = pygame.transform.scale(texture, CELL_SIZE)
 
     def tick(self, tick_count: int) -> None:
         if self._tower:
             self._tower.tick(tick_count)
 
     def draw(self, surface: Surface) -> None:
+        surface.blit(self._texture, self.location.as_tuple())
         if self._tower:
             self._tower.draw(surface)
-        else:
-            surface.fill((32, 32, 32), self.bounds())
 
     def bounds(self) -> Rect:
         return self.location.as_rect(CELL_SIZE[0], CELL_SIZE[1])

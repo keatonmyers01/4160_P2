@@ -9,7 +9,7 @@ from engine.location import Location
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType, aquire_projectile_velocities
+from game.tower import Tower, TowerStage, EntityTargetType, calculate_projectile_vel
 
 
 class Grenadier(Tower):
@@ -22,16 +22,13 @@ class Grenadier(Tower):
         self._max_velocity = 5
         self._damage = 30
         self._regeneration_rate = 1
-        self._starting_health = 300
-        self._max_health = 300
         self._ability_cooldown = 2
-        self._health = self._starting_health
         self._upgrade_cost = 80
         self._area_of_effect = 300
         self._aoe_radius = 50
 
     def _on_ability(self, *args: Enemy) -> None:
-        projectile_velocity = aquire_projectile_velocities(self, random.choice(args), self._max_velocity)
+        projectile_velocity = calculate_projectile_vel(self, random.choice(args), self._max_velocity)
         projectile = GrenadierProjectile(location=self.location.copy(), velocity=projectile_velocity,
                                          damage=self._damage, priority=20, aoe_radius=self._aoe_radius)
         engine.entity_handler.register_entity(projectile)
@@ -44,14 +41,12 @@ class Grenadier(Tower):
         match stage:
             case TowerStage.STAGE_2:
                 self._damage = 40
-                self._max_health = 400
                 self._health = 400
                 self._area_of_effect = 350
                 self._upgrade_cost = 250
                 self._aoe_radius = 60
             case TowerStage.STAGE_3:
                 self._damage = 60
-                self._max_health = 500
                 self._health = 500
                 self._area_of_effect = 425
                 self._regeneration_rate = 2

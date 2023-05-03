@@ -17,10 +17,7 @@ class Sniper(Tower):
         self._building_cost = 40
         self._damage = 200
         self._regeneration_rate = 0
-        self._starting_health = 250
-        self._max_health = 250
         self._ability_cooldown = 3
-        self._health = self._starting_health
         self._upgrade_cost = 60
         self._area_of_effect = 400
 
@@ -34,14 +31,12 @@ class Sniper(Tower):
         match stage:
             case TowerStage.STAGE_2:
                 self._damage = 300
-                self._max_health = 300
                 self._health = 300
                 self._area_of_effect = 500
                 self._regeneration_rate = 0
                 self._upgrade_cost = 100
             case TowerStage.STAGE_3:
                 self._damage = 450
-                self._max_health = 400
                 self._health = 400
                 self._area_of_effect = 600
                 self._regeneration_rate = 0

@@ -7,21 +7,16 @@ from engine.location import Location
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType, aquire_projectile_velocities
+from game.tower import Tower, TowerStage, EntityTargetType, calculate_projectile_vel
 
 
 class Healer(Tower):
 
     def __init__(self):
         super().__init__()
-        self.texture = pygame.image.load(Texture.CORE_TOWER.value)
-        self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
         self._building_cost = 35
         self._regeneration_rate = 3
-        self._starting_health = 300
-        self._max_health = 300
         self._ability_cooldown = 1
-        self._health = self._starting_health
         self._upgrade_cost = 60
         self._area_of_effect = 0
         self._detect_range = 300
@@ -30,7 +25,6 @@ class Healer(Tower):
         self._healing_rate = 10
 
     def _on_ability(self, *args: Enemy) -> None:
-
         projectile = HealerProjectile(location=self.location.copy(), velocity=(0, 0), health=self._projectile_health,
                                       healing_rate=self._healing_rate, priority=20, detect_range=self._detect_range,
                                       life_span=self._life_span)
@@ -43,7 +37,6 @@ class Healer(Tower):
     def _on_upgrade(self, stage: TowerStage) -> None:
         match stage:
             case TowerStage.STAGE_2:
-                self._max_health = 400
                 self._health = 400
                 self._upgrade_cost = 80
                 self._detect_range = 130
@@ -51,7 +44,6 @@ class Healer(Tower):
                 self._projectile_health = 60
                 self._healing_rate = 15
             case TowerStage.STAGE_3:
-                self._max_health = 500
                 self._health = 500
                 self._detect_range = 150
                 self._life_span = 12
@@ -91,7 +83,7 @@ class HealerProjectile(Entity):
         self.color = (0, 0, 0)
         self.detect_range = detect_range
         self.target = None
-        self.onTarget = False
+        self.on_target = False
         self._life_span = round(life_span * engine.window.fps)
 
     @property
@@ -110,14 +102,14 @@ class HealerProjectile(Entity):
                 if min_tower_health > tower.health > 0:
                     self.target = tower
                     min_tower_health = tower.health
-        elif not self.onTarget:
-            self.velocity = aquire_projectile_velocities(self, self.target, 5)
+        elif not self.on_target:
+            self.velocity = calculate_projectile_vel(self, self.target, 5)
             self.location.add(self._velocity[0], self._velocity[1])
             collisions = self.nearby_entities_type(self._radius, Tower)
             if self.target in collisions:
                 self.velocity = (0, 0)
-                self.onTarget = True
-        if self.onTarget:
+                self.on_target = True
+        if self.on_target:
             self.on_collide()
 
         if self._life_span <= 0:

@@ -1,5 +1,5 @@
 CELL_SIZE: tuple[int, int] = (32, 32)
-BG_TILE_SIZE: tuple[int, int] = (128, 128)
+BG_TILE_SIZE: tuple[int, int] = (40, 40)
 GRID_WIDTH: int = 25
 GRID_HEIGHT: int = 17
 FRAMES_PER_SECOND: int = 60
