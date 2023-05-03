@@ -4,7 +4,6 @@ import pygame
 from pygame import Surface, Rect
 
 import engine
-from engine import EngineError
 from engine.entity import Entity, LivingEntity
 from engine.location import Location
 from game.constants import CELL_SIZE
@@ -21,7 +20,6 @@ class GrapeShot(Tower):
         self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
         self._building_cost = 45
         self._max_velocity = 3
-
         self._damage = 25
         self._regeneration_rate = 0
         self._starting_health = 350
@@ -42,29 +40,8 @@ class GrapeShot(Tower):
             engine.entity_handler.register_entity(projectile)
             projectile.spawn()
 
-    def tick(self, tick_count: int) -> None:
-        super().tick(tick_count)
-
-    def draw(self, surface: Surface) -> None:
-        surface.blit(self.texture, self.location.as_tuple())
-
-    def regeneration_rate(self) -> int:
-        return 0
-
-    def starting_health(self) -> int:
-        return 350
-
     def entity_target(self) -> EntityTargetType:
         return EntityTargetType.ENEMY
-
-    def build_cost(self) -> int:
-        return 50
-
-    def ability_cooldown(self) -> float:
-        return 1.5
-
-    def area_of_effect(self) -> int:
-        return 250
 
     def _on_upgrade(self, stage: TowerStage) -> None:
         match stage:
@@ -82,8 +59,6 @@ class GrapeShot(Tower):
                 self._health = 500
                 self._area_of_effect = 250
                 self._projectile_count = 10
-            case _:
-                raise EngineError()
 
     @property
     def max_health(self) -> int:

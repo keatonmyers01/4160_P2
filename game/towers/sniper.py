@@ -1,9 +1,7 @@
-import pygame
-from pygame import Surface
-
 import random
 
-from engine import EngineError
+import pygame
+
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.texture import Texture
@@ -29,23 +27,8 @@ class Sniper(Tower):
     def _on_ability(self, *args: Enemy) -> None:
         random.choice(args).damage(self._damage)
 
-    def regeneration_rate(self) -> int:
-        return self._regeneration_rate
-
-    def starting_health(self) -> int:
-        return self._starting_health
-
     def entity_target(self) -> EntityTargetType:
         return EntityTargetType.ENEMY
-
-    def build_cost(self) -> int:
-        return self._building_cost
-
-    def ability_cooldown(self) -> float:
-        return self._ability_cooldown
-
-    def area_of_effect(self) -> int:
-        return self._area_of_effect
 
     def _on_upgrade(self, stage: TowerStage) -> None:
         match stage:
@@ -62,8 +45,6 @@ class Sniper(Tower):
                 self._health = 400
                 self._area_of_effect = 600
                 self._regeneration_rate = 0
-            case _:
-                raise EngineError()
 
     @property
     def max_health(self) -> int:

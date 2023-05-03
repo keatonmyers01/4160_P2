@@ -6,7 +6,6 @@ import engine
 from engine.entity import Entity
 from engine.errors import BadArgument
 from engine.location import Location
-from engine.util import min_max, random_color
 from game.constants import CELL_SIZE
 from game.tower import Tower
 from game.towers.core import CoreTower
@@ -29,7 +28,7 @@ class Cell(Entity):
         if self._tower:
             self._tower.draw(surface)
         else:
-            surface.fill(random_color(), self.bounds())
+            surface.fill((32, 32, 32), self.bounds())
 
     def bounds(self) -> Rect:
         return self.location.as_rect(CELL_SIZE[0], CELL_SIZE[1])
@@ -59,6 +58,30 @@ class Cell(Entity):
             value.spawn()
         if not value and self._tower:
             self._tower.dispose()
+
+    @property
+    def cell_above(self) -> 'Cell | None':
+        if self._y + 1 >= self._grid.height:
+            return None
+        return self._grid.cells[self._x][self._y + 1]
+
+    @property
+    def cell_left(self) -> 'Cell | None':
+        if self._x - 1 < 0:
+            return None
+        return self._grid.cells[self._x - 1][self._y]
+
+    @property
+    def cell_right(self) -> 'Cell | None':
+        if self._x + 1 >= self._grid.width:
+            return None
+        return self._grid.cells[self._x + 1][self._y]
+
+    @property
+    def cell_below(self) -> 'Cell | None':
+        if self._y - 1 < 0:
+            return None
+        return self._grid.cells[self._x][self._y - 1]
 
     @Entity.location.setter
     def location(self, value: Union[Location, Callable[[Rect], Location]]) -> None:
@@ -108,6 +131,14 @@ class Grid(Entity):
     def cells(self) -> list[list[Cell]]:
         return self._cells
 
+    @property
+    def width(self) -> int:
+        return self._w
+
+    @property
+    def height(self) -> int:
+        return self._h
+
     def get_cell_on_click(self, mouse_pos: tuple[int, int]) -> Cell | None:
         if not self.bounds().collidepoint(mouse_pos):
             return None
@@ -115,17 +146,23 @@ class Grid(Entity):
         row = int((mouse_pos[1] - self.location.y) // CELL_SIZE[1])
         return self._cells[col][row]
 
-    def can_place_tower(self, mouse_pos: tuple[int, int]) -> bool:
-        if cell := self.get_cell_on_click(mouse_pos):
-            if cell.tower:
-                return False
-            up_cell = self._cells[cell.x][min_max(cell.y - 1, 0, self._h)]
-            left_cell = self._cells[min_max(cell.x - 1, 0, self._w)][cell.y]
-            right_cell = self._cells[min_max(cell.x + 1, 0, self._w)][cell.y]
-            down_cell = self._cells[cell.x][min_max(cell.y + 1, 0, self._h)]
-            for c in [up_cell, left_cell, right_cell, down_cell]:
-                if c.tower:
-                    return True
+    def can_place_tower(self,
+                        *,
+                        coords: tuple[int, int] | None = None,
+                        mouse_pos: tuple[int, int] | None = None) -> bool:
+        cell: Cell | None = None
+        if coords:
+            cell = self._cells[coords[0]][coords[1]]
+        elif mouse_pos:
+            cell = self.get_cell_on_click(mouse_pos)
+        if not cell:
+            return False
+        if not cell.empty:
+            return False
+        for c in [cell.cell_left, cell.cell_above, cell.cell_right, cell.cell_below]:
+            if c.empty:
+                continue
+            return True
         return False
 
     def _on_dispose(self) -> None:

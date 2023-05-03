@@ -11,6 +11,8 @@ from game.constants import CELL_SIZE
 from game.enemy import Enemy
 from game.player import Player
 
+TEXTURE_PATH = 'game/asset/tower'
+
 
 class EntityTargetType(Enum):
     ENEMY = 0,

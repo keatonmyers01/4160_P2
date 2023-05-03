@@ -2,7 +2,6 @@ import pygame
 from pygame import Surface, Rect
 
 import engine
-from engine import EngineError
 from engine.entity import Entity
 from engine.location import Location
 from game.constants import CELL_SIZE
@@ -18,7 +17,6 @@ class Healer(Tower):
         self.texture = pygame.image.load(Texture.CORE_TOWER.value)
         self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
         self._building_cost = 35
-
         self._regeneration_rate = 3
         self._starting_health = 300
         self._max_health = 300
@@ -39,29 +37,8 @@ class Healer(Tower):
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
 
-    def tick(self, tick_count: int) -> None:
-        super().tick(tick_count)
-
-    def draw(self, surface: Surface) -> None:
-        surface.blit(self.texture, self.location.as_tuple())
-
-    def regeneration_rate(self) -> int:
-        return self._regeneration_rate
-
-    def starting_health(self) -> int:
-        return self._starting_health
-
     def entity_target(self) -> EntityTargetType:
         return EntityTargetType.NONE
-
-    def build_cost(self) -> int:
-        return self._building_cost
-
-    def ability_cooldown(self) -> float:
-        return self._ability_cooldown
-
-    def area_of_effect(self) -> int:
-        return self._area_of_effect
 
     def _on_upgrade(self, stage: TowerStage) -> None:
         match stage:
@@ -80,8 +57,6 @@ class Healer(Tower):
                 self._life_span = 12
                 self._projectile_health = 100
                 self._healing_rate = 25
-            case _:
-                raise EngineError()
 
     @property
     def max_health(self) -> int:

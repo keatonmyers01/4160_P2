@@ -1,10 +1,9 @@
+import random
+
 import pygame
 from pygame import Surface, Rect
 
-import random
-
 import engine
-from engine import EngineError
 from engine.entity import Entity
 from engine.location import Location
 from game.constants import CELL_SIZE
@@ -21,7 +20,6 @@ class Grenadier(Tower):
         self._texture = pygame.transform.scale(self._texture, CELL_SIZE)
         self._building_cost = 50
         self._max_velocity = 5
-
         self._damage = 30
         self._regeneration_rate = 1
         self._starting_health = 300
@@ -39,23 +37,8 @@ class Grenadier(Tower):
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
 
-    def regeneration_rate(self) -> int:
-        return self._regeneration_rate
-
-    def starting_health(self) -> int:
-        return self._starting_health
-
     def entity_target(self) -> EntityTargetType:
         return EntityTargetType.ENEMY
-
-    def build_cost(self) -> int:
-        return self._building_cost
-
-    def ability_cooldown(self) -> float:
-        return self._ability_cooldown
-
-    def area_of_effect(self) -> int:
-        return self._area_of_effect
 
     def _on_upgrade(self, stage: TowerStage) -> None:
         match stage:
@@ -73,8 +56,6 @@ class Grenadier(Tower):
                 self._area_of_effect = 425
                 self._regeneration_rate = 2
                 self._aoe_radius = 75
-            case _:
-                raise EngineError()
 
     @property
     def max_health(self) -> int:

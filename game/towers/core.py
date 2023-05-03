@@ -1,18 +1,19 @@
 import random
 
 import engine
-from engine import EngineError
 from game.enemy import Enemy
-from game.tower import Tower, TowerStage, EntityTargetType, TowerState
+from game.tower import Tower, TowerStage, EntityTargetType, TowerState, aquire_projectile_velocities, TEXTURE_PATH
 from game.towers.archer import ArcherProjectile
+
+CORE_TEXTURE_PATH = f'{TEXTURE_PATH}/core'
 
 
 class CoreTower(Tower):
 
     def __init__(self):
         super().__init__(scalar=0.4, ticks_per_frame=4)
-        self.add_state(TowerState.IDLE, 'game/asset/tower/core', 1)
-        self.add_state(TowerState.PERFORMING_ABILITY, 'game/asset/tower/core', 8)
+        self.add_state(TowerState.IDLE, CORE_TEXTURE_PATH, 1)
+        self.add_state(TowerState.PERFORMING_ABILITY, CORE_TEXTURE_PATH, 12)
         self._building_cost = 0
         self._max_velocity = 8
         self._damage = 40
@@ -25,29 +26,14 @@ class CoreTower(Tower):
         self._area_of_effect = 150
 
     def _on_ability(self, *args: Enemy) -> None:
-        projectile_velocity = self.aquire_projectile_velocities(random.choice(args), self._max_velocity)
+        projectile_velocity = aquire_projectile_velocities(self, random.choice(args), self._max_velocity)
         projectile = ArcherProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=self._damage,
                                       priority=20)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
 
-    def regeneration_rate(self) -> int:
-        return self._regeneration_rate
-
-    def starting_health(self) -> int:
-        return self._starting_health
-
     def entity_target(self) -> EntityTargetType:
         return EntityTargetType.ENEMY
-
-    def build_cost(self) -> int:
-        return self._building_cost
-
-    def ability_cooldown(self) -> float:
-        return self._ability_cooldown
-
-    def area_of_effect(self) -> int:
-        return self._area_of_effect
 
     def _on_upgrade(self, stage: TowerStage) -> None:
         match stage:
@@ -64,8 +50,6 @@ class CoreTower(Tower):
                 self._health = 2500
                 self._area_of_effect = 250
                 self._regeneration_rate = 3
-            case _:
-                raise EngineError()
 
     @property
     def max_health(self) -> int:

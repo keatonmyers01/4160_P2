@@ -1,1 +1,6 @@
 CELL_SIZE: tuple[int, int] = (32, 32)
+BG_TILE_SIZE: tuple[int, int] = (128, 128)
+GRID_WIDTH: int = 25
+GRID_HEIGHT: int = 17
+FRAMES_PER_SECOND: int = 60
+PIXELS_OFFSCREEN_BOUNDARY = 300
