@@ -5,16 +5,20 @@ from pygame import Surface, Rect
 import engine
 from engine.entity import Entity, LivingEntity
 from engine.location import Location
-from game.board import Tower, calculate_projectile_vel, Enemy, EntityTargetType, TowerStage
+from game.board import Tower, calculate_projectile_vel, Enemy, EntityTargetType, TowerStage, TowerState, TEXTURE_PATH
+
+ARCHER_ASSETS = f'{TEXTURE_PATH}/archer'
 
 
 class Archer(Tower):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(scalar=3)
+        self.add_state(TowerState.IDLE, ARCHER_ASSETS, 1)
+        self.add_state(TowerState.PERFORMING_ABILITY, ARCHER_ASSETS, 9)
         self._building_cost = 30
         self._max_velocity = 5
-        self._damage = 20
+        self._dmg_amt = 20
         self._regeneration_rate = 0
         self._max_health = 200
         self._ability_cooldown = 1
@@ -23,7 +27,7 @@ class Archer(Tower):
 
     def _on_ability(self, *args: Enemy) -> None:
         projectile_velocity = calculate_projectile_vel(self, random.choice(args), self._max_velocity)
-        projectile = ArcherProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=self._damage,
+        projectile = ArcherProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=self._dmg_amt,
                                       priority=20)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
@@ -34,7 +38,7 @@ class Archer(Tower):
     def _on_upgrade(self, stage: TowerStage) -> None:
         match stage:
             case TowerStage.STAGE_2:
-                self._damage = 30
+                self._dmg_amt = 30
                 self._max_health = 300
                 self._health = 300
                 self._area_of_effect = 200
@@ -42,7 +46,7 @@ class Archer(Tower):
                 self._upgrade_cost = 70
                 self._ability_cooldown = 0.8
             case TowerStage.STAGE_3:
-                self._damage = 45
+                self._dmg_amt = 45
                 self._max_health = 450
                 self._health = 450
                 self._area_of_effect = 250

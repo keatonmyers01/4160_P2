@@ -1,21 +1,26 @@
 import random
 
-from game.board import Tower, Enemy, EntityTargetType, TowerStage
+from game.board import Tower, Enemy, EntityTargetType, TowerStage, TowerState
+from game.constants import TEXTURE_PATH
+
+SNIPER_ASSETS = f'{TEXTURE_PATH}/tower/snipe'
 
 
 class Sniper(Tower):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(scalar=3)
+        self.add_state(TowerState.IDLE, SNIPER_ASSETS, 1)
+        self.add_state(TowerState.PERFORMING_ABILITY, SNIPER_ASSETS, 6)
         self._building_cost = 40
-        self._damage = 200
+        self._dmg_amt = 200
         self._regeneration_rate = 0
         self._ability_cooldown = 3
         self._upgrade_cost = 60
         self._area_of_effect = 400
 
     def _on_ability(self, *args: Enemy) -> None:
-        random.choice(args).damage(self._damage)
+        random.choice(args).damage(self._dmg_amt)
 
     def entity_target(self) -> EntityTargetType:
         return EntityTargetType.ENEMY
@@ -23,13 +28,13 @@ class Sniper(Tower):
     def _on_upgrade(self, stage: TowerStage) -> None:
         match stage:
             case TowerStage.STAGE_2:
-                self._damage = 300
+                self._dmg_amt = 300
                 self._health = 300
                 self._area_of_effect = 500
                 self._regeneration_rate = 0
                 self._upgrade_cost = 100
             case TowerStage.STAGE_3:
-                self._damage = 450
+                self._dmg_amt = 450
                 self._health = 400
                 self._area_of_effect = 600
                 self._regeneration_rate = 0

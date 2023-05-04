@@ -13,12 +13,12 @@ GRAPE_TEXTURE = f'{TEXTURE_PATH}/grape'
 class GrapeShot(Tower):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(scalar=3)
         self.add_state(TowerState.IDLE, GRAPE_TEXTURE, 1)
         self.add_state(TowerState.PERFORMING_ABILITY, GRAPE_TEXTURE, 13)
         self._building_cost = 45
         self._max_velocity = 3
-        self._damage = 25
+        self._dmg_amt = 25
         self._regeneration_rate = 0
         self._ability_cooldown = 1
         self._upgrade_cost = 65
@@ -30,7 +30,7 @@ class GrapeShot(Tower):
         for i in range(self._projectile_count):
             dx = projectile_velocity[0] + random.uniform(-0.5, 0.5)
             dy = projectile_velocity[1] + random.uniform(-0.5, 0.5)
-            projectile = GrapeShotProjectile(location=self.location.copy(), velocity=(dx, dy), damage=self._damage,
+            projectile = GrapeShotProjectile(location=self.location.copy(), velocity=(dx, dy), damage=self._dmg_amt,
                                              priority=20 + i)
             engine.entity_handler.register_entity(projectile)
             projectile.spawn()
@@ -41,13 +41,13 @@ class GrapeShot(Tower):
     def _on_upgrade(self, stage: TowerStage) -> None:
         match stage:
             case TowerStage.STAGE_2:
-                self._damage = 30
+                self._dmg_amt = 30
                 self._health = 425
                 self._area_of_effect = 200
                 self._upgrade_cost = 90
                 self._projectile_count = 6
             case TowerStage.STAGE_3:
-                self._damage = 45
+                self._dmg_amt = 45
                 self._health = 500
                 self._area_of_effect = 250
                 self._projectile_count = 10

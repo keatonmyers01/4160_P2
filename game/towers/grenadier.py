@@ -5,16 +5,20 @@ from pygame import Surface, Rect
 import engine
 from engine.entity import Entity
 from engine.location import Location
-from game.board import Tower, Enemy, calculate_projectile_vel, EntityTargetType, TowerStage
+from game.board import Tower, Enemy, calculate_projectile_vel, EntityTargetType, TowerStage, TowerState, TEXTURE_PATH
+
+GREN_ASSETS = f'{TEXTURE_PATH}/shrap'
 
 
 class Grenadier(Tower):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(scalar=3)
+        self.add_state(TowerState.IDLE, GREN_ASSETS, 1)
+        self.add_state(TowerState.PERFORMING_ABILITY, GREN_ASSETS, 5)
         self._building_cost = 50
         self._max_velocity = 5
-        self._damage = 30
+        self._dmg_amt = 30
         self._regeneration_rate = 1
         self._ability_cooldown = 2
         self._upgrade_cost = 80
@@ -24,7 +28,7 @@ class Grenadier(Tower):
     def _on_ability(self, *args: Enemy) -> None:
         projectile_velocity = calculate_projectile_vel(self, random.choice(args), self._max_velocity)
         projectile = GrenadierProjectile(location=self.location.copy(), velocity=projectile_velocity,
-                                         damage=self._damage, priority=20, aoe_radius=self._aoe_radius)
+                                         damage=self._dmg_amt, priority=20, aoe_radius=self._aoe_radius)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
 
@@ -34,13 +38,13 @@ class Grenadier(Tower):
     def _on_upgrade(self, stage: TowerStage) -> None:
         match stage:
             case TowerStage.STAGE_2:
-                self._damage = 40
+                self._dmg_amt = 40
                 self._health = 400
                 self._area_of_effect = 350
                 self._upgrade_cost = 250
                 self._aoe_radius = 60
             case TowerStage.STAGE_3:
-                self._damage = 60
+                self._dmg_amt = 60
                 self._health = 500
                 self._area_of_effect = 425
                 self._regeneration_rate = 2

@@ -5,16 +5,21 @@ from pygame import Surface, Rect
 import engine
 from engine.entity import Entity
 from engine.location import Location
-from game.board import Tower, Enemy, EntityTargetType, TowerStage
+from game.board import Tower, Enemy, EntityTargetType, TowerStage, TowerState
+from game.constants import TEXTURE_PATH
+
+MINE_ASSETS = f'{TEXTURE_PATH}/tower/h2'
 
 
 class Minefield(Tower):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(scalar=0.6)
+        self.add_state(TowerState.IDLE, MINE_ASSETS, 1)
+        self.add_state(TowerState.PERFORMING_ABILITY, MINE_ASSETS, 15)
         self._building_cost = 0
         self._max_velocity = 5
-        self._damage = 30
+        self._dmg_amt = 30
         self._regeneration_rate = 0
         self._ability_cooldown = 2
         self._upgrade_cost = 70
@@ -33,7 +38,7 @@ class Minefield(Tower):
             y_mod *= -1
         projectile_velocity = (velocity_seed * x_mod, (5 - velocity_seed) * y_mod)
         projectile = MinefieldProjectile(location=self.location.copy(), velocity=projectile_velocity,
-                                         damage=self._damage, priority=20, aoe_radius=self._aoe_radius,
+                                         damage=self._dmg_amt, priority=20, aoe_radius=self._aoe_radius,
                                          life_span=self._lifespan)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
@@ -44,14 +49,14 @@ class Minefield(Tower):
     def _on_upgrade(self, stage: TowerStage) -> None:
         match stage:
             case TowerStage.STAGE_2:
-                self._damage = 45
+                self._dmg_amt = 45
                 self._health = 400
                 self._area_of_effect = 125
                 self._upgrade_cost = 100
                 self._lifespan = 7
                 self._aoe_radius = 110
             case TowerStage.STAGE_3:
-                self._damage = 70
+                self._dmg_amt = 70
                 self._health = 450
                 self._area_of_effect = 150
                 self._lifespan = 10

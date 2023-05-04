@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from enum import Enum
-from random import randint, choice
+from random import choice
 from threading import Timer
 from typing import Callable, Union
 
@@ -389,20 +389,22 @@ class EnemyState(Enum):
 
 class Enemy(Sprite):
 
-    def __init__(self, mouse_pos: tuple[int, int]):
-        super().__init__(EnemyState.EXISTING, priority=10, health_bar=True)
+    def __init__(self, loc: Location | tuple[int, int]):
+        super().__init__(EnemyState.EXISTING,
+                         ticks_per_frame=3,
+                         scalar=2,
+                         priority=10,
+                         health_bar=True)
         self.add_state(EnemyState.EXISTING, 'game/asset', 6)
-        self.location = Location()
-        self.location.add(mouse_pos[0], mouse_pos[1])
+        self.location = loc if isinstance(loc, Location) else Location(loc[0], loc[1])
         self.on_cooldown = True
-        self._type: bool = bool(randint(0, 1))
         self._target_timer: int = 0
         self.aquired_target: bool = False
         self.target: LivingEntity | None = None
         self._velocity: tuple[float, float] = (0, 0)
         self.max_velocity: int = 2
         self.on_target: bool = False
-        self.damage: int = 25
+        self._dmg_amt: int = 25
         self.ability_cooldown: int = 0
         self._ability_timer = Timer(self.ability_cooldown, self.perform_ability)
 
@@ -461,11 +463,9 @@ class Enemy(Sprite):
         return 0.5
 
     def _on_ability(self):
-        print("on ability")
-        self.target.damage(self.damage)
+        self.target.damage(self._dmg_amt)
 
     def perform_ability(self) -> None:
-        print("performing ability")
         if self.on_target:
             self._on_ability()
             self.on_cooldown = True
@@ -508,8 +508,11 @@ class CoreTower(Tower):
         self._area_of_effect = 150
 
     def _on_ability(self, *args: Enemy) -> None:
-        # todo
-        pass
+        projectile_velocity = calculate_projectile_vel(self, choice(args), self._max_velocity)
+        projectile = CoreProjectile(location=self.location.copy(), velocity=projectile_velocity, damage=self._damage,
+                                    priority=20)
+        engine.entity_handler.register_entity(projectile)
+        projectile.spawn()
 
     def entity_target(self) -> EntityTargetType:
         return EntityTargetType.ENEMY
@@ -542,3 +545,42 @@ class CoreTower(Tower):
 
     def _on_death(self) -> None:
         pass
+
+
+class CoreProjectile(Entity):
+
+    def __init__(self, location: Location = Location(),
+                 priority: int = 0,
+                 *,
+                 velocity: tuple[float, float] = (0, 0),
+                 damage: int = 0):
+        super().__init__(location, priority)
+        self._velocity = velocity
+        self._max_velocity = 5
+        self._damage = damage
+        self._radius = 10
+        self.color = (100, 100, 100)
+
+    @property
+    def velocity(self) -> tuple[float, float]:
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value: tuple[int, int]):
+        self._velocity = value
+
+    def tick(self, tick_count: int) -> None:
+        self.location.add(self._velocity[0], self._velocity[1])
+        collisions = self.nearby_entities_type(self._radius, Enemy)
+        if len(collisions) > 0:
+            self.on_collide(collisions[0])
+
+    def draw(self, surface: Surface) -> None:
+        surface.fill(self.color, self.bounds())
+
+    def bounds(self) -> Rect:
+        return self.location.as_rect(self._radius, self._radius)
+
+    def on_collide(self, entity: LivingEntity):
+        entity.damage(self._damage)
+        self.dispose()

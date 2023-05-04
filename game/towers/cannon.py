@@ -5,16 +5,20 @@ from pygame import Surface, Rect
 import engine
 from engine.entity import Entity, LivingEntity
 from engine.location import Location
-from game.board import Tower, Enemy, calculate_projectile_vel, EntityTargetType, TowerStage
+from game.board import Tower, Enemy, calculate_projectile_vel, EntityTargetType, TowerStage, TowerState, TEXTURE_PATH
+
+SHRAPNEL_ASSETS = f'{TEXTURE_PATH}/shrap'
 
 
 class ShrapnelCannon(Tower):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(scalar=3)
+        self.add_state(TowerState.IDLE, SHRAPNEL_ASSETS, 1)
+        self.add_state(TowerState.PERFORMING_ABILITY, SHRAPNEL_ASSETS, 5)
         self._building_cost = 40
         self._max_velocity = 3
-        self._damage = 15
+        self._dmg_amt = 15
         self._regeneration_rate = 0
         self._max_health = 350
         self._ability_cooldown = 2
@@ -25,7 +29,7 @@ class ShrapnelCannon(Tower):
     def _on_ability(self, *args: Enemy) -> None:
         projectile_velocity = calculate_projectile_vel(self, random.choice(args), self._max_velocity)
         projectile = ShrapnelProjectile(location=self.location.copy(), velocity=projectile_velocity,
-                                        damage=self._damage, priority=20, secondary_count=self._secondary_count)
+                                        damage=self._dmg_amt, priority=20, secondary_count=self._secondary_count)
         engine.entity_handler.register_entity(projectile)
         projectile.spawn()
 
@@ -35,7 +39,7 @@ class ShrapnelCannon(Tower):
     def _on_upgrade(self, stage: TowerStage) -> None:
         match stage:
             case TowerStage.STAGE_2:
-                self._damage = 30
+                self._dmg_amt = 30
                 self._max_health = 450
                 self._health = 450
                 self._area_of_effect = 300
@@ -43,7 +47,7 @@ class ShrapnelCannon(Tower):
                 self._upgrade_cost = 250
                 self._secondary_count = 12
             case TowerStage.STAGE_3:
-                self._damage = 30
+                self._dmg_amt = 30
                 self._max_health = 650
                 self._health = 650
                 self._area_of_effect = 400

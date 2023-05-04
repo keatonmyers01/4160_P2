@@ -8,7 +8,7 @@ from pygame import Surface, Rect, Color
 from pygame.font import Font
 
 import engine
-from engine.color import WHITE, RED, GREEN
+from engine.color import WHITE, RED, GREEN, BLACK
 from engine.location import Location
 from engine.util import min_max
 from game.texture import Texture
@@ -662,3 +662,93 @@ class TiledBackground(Entity):
     def bounds(self) -> Rect:
         res = engine.window.resolution
         return self.location.as_rect(res.width, res.height)
+
+
+class StrokedString(Entity):
+
+    def __init__(self, font: Font, text: str, fg: Color = WHITE, bg: Color = BLACK):
+        super().__init__()
+        self._font = font
+        self._text = text
+        self._fg = fg
+        self._bg = bg
+        self._rerender()
+
+    def tick(self, tick_count: int) -> None:
+        # do nothing
+        pass
+
+    def draw(self, surface: Surface) -> None:
+        surface.blit(self._surface, self.location.as_tuple())
+
+    def bounds(self) -> Rect:
+        return self._surface.get_rect()
+
+    def _rerender(self) -> None:
+        self._surface = self._font.render(self._text, True, self._fg)
+        self._surface = self._outline(self._surface, 10, self._bg)
+
+    def _outline(self, image: Surface, thickness: int, color: Color, color_key: tuple = (255, 0, 255)) -> Surface:
+        mask = pygame.mask.from_surface(image)
+        mask_surf = mask.to_surface(setcolor=color)
+        mask_surf.set_colorkey((0, 0, 0))
+
+        new_img = pygame.Surface((image.get_width() + 2, image.get_height() + 2))
+        new_img.fill(color_key)
+        new_img.set_colorkey(color_key)
+
+        for i in -thickness, thickness:
+            new_img.blit(mask_surf, (i + thickness, thickness))
+            new_img.blit(mask_surf, (thickness, i + thickness))
+        new_img.blit(image, (thickness, thickness))
+
+        return new_img
+
+    def _circle_points(self, r: int) -> list[tuple[int, int]]:
+        x, y, e = r, 0, 1 - r
+        points = []
+        while x >= y:
+            points.append((x, y))
+            y += 1
+            if e < 0:
+                e += 2 * y - 1
+            else:
+                x -= 1
+                e += 2 * (y - x) - 1
+        points += [(y, x) for x, y in points if x > y]
+        points += [(-x, y) for x, y in points if x]
+        points += [(x, -y) for x, y in points if y]
+        points.sort()
+        return points
+
+    @property
+    def text(self) -> str:
+        return self._text
+
+    @text.setter
+    def text(self, text: str) -> None:
+        self._text = text
+        self._rerender()
+
+    @Entity.location.setter
+    def location(self, value: Union[Location, Callable[[Rect], Location]]) -> None:
+        self._loc = value if isinstance(value, Location) else value(self.bounds())
+        self._rerender()
+
+    @property
+    def fg(self) -> Color:
+        return self._fg
+
+    @fg.setter
+    def fg(self, value: Color) -> None:
+        self._fg = value
+        self._rerender()
+
+    @property
+    def bg(self) -> Color:
+        return self._bg
+
+    @bg.setter
+    def bg(self, value: Color) -> None:
+        self._bg = value
+        self._rerender()

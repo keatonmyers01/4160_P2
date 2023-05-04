@@ -4,13 +4,17 @@ from pygame import Surface, Rect
 import engine
 from engine.entity import Entity
 from engine.location import Location
-from game.board import Enemy, EntityTargetType, Tower, TowerStage, calculate_projectile_vel
+from game.board import Enemy, EntityTargetType, Tower, TowerStage, calculate_projectile_vel, TEXTURE_PATH, TowerState
+
+HEALER_ASSETS = f'{TEXTURE_PATH}/h1'
 
 
 class Healer(Tower):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(scalar=0.75)
+        self.add_state(TowerState.IDLE, HEALER_ASSETS, 1)
+        self.add_state(TowerState.PERFORMING_ABILITY, HEALER_ASSETS, 12)
         self._building_cost = 35
         self._regeneration_rate = 3
         self._ability_cooldown = 1
