@@ -357,7 +357,7 @@ class Enemy(Sprite):
 
     def __init__(self, mouse_pos: tuple[int, int]):
         super().__init__(EnemyState.EXISTING, priority=10, health_bar=True)
-        self.add_state(EnemyState.EXISTING, TEXTURE_PATH, 6)
+        self.add_state(EnemyState.EXISTING, 'game/asset', 6)
         self.location.x = mouse_pos[0]
         self.location.y = mouse_pos[1]
         self.on_cooldown = True
@@ -365,15 +365,15 @@ class Enemy(Sprite):
         self._target_timer: int = 0
         self.target: LivingEntity | None = None
         self._velocity: tuple[float, float] = (0, 0)
-        self.max_velocity: int = 6
+        self.max_velocity: int = 2
         self.on_target: bool = False
         self.damage: int = 25
         self.ability_cooldown: int = 0
         self._ability_timer = Timer(self.ability_cooldown, self.perform_ability)
 
     def calculate_travel_velocity(self) -> tuple[float, float]:
-        orgin = self.location
-        target_location = self.target.location
+        orgin = self.location.copy()
+        target_location = self.target.location.copy()
         x_distance = orgin.directional_dist_x(target_location)
         y_distance = orgin.directional_dist_y(target_location)
         total_distance = abs(y_distance) + abs(x_distance)
@@ -391,10 +391,10 @@ class Enemy(Sprite):
         super().tick(tick_count)
 
         # reestablish a target every second
-        if self._target_timer % 30 and not self.on_target:
+        if (self._target_timer % 30 and not self.on_target) or self._target_timer == 0:
             target_range = 1
             targets = self.nearby_entities_type(target_range * 50, Tower)
-            while len(targets) > 0:
+            while len(targets) <= 0:
                 targets = self.nearby_entities_type(target_range * 50, Tower)
                 target_range += 1
             self.target = choice(targets)
