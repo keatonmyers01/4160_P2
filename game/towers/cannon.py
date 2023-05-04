@@ -1,14 +1,11 @@
 import random
 
-import pygame
 from pygame import Surface, Rect
 
 import engine
 from engine.entity import Entity, LivingEntity
 from engine.location import Location
-from game.constants import CELL_SIZE
 from game.enemy import Enemy
-from game.texture import Texture
 from game.tower import Tower, TowerStage, EntityTargetType, calculate_projectile_vel
 
 
@@ -16,8 +13,6 @@ class ShrapnelCannon(Tower):
 
     def __init__(self):
         super().__init__()
-        self.texture = pygame.image.load(Texture.CORE_TOWER.value)
-        self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
         self._building_cost = 40
         self._max_velocity = 3
         self._damage = 15

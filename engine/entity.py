@@ -331,7 +331,7 @@ class LivingEntity(Entity):
                  health_bar: bool = False,
                  bound_to_screen: bool = False):
         super().__init__(location, priority)
-        self._health = min(health, self.max_health)
+        self._health = max(health, self.max_health)
         self._max_health = self.max_health
         self._velocity = velocity
         self._health_bar: HealthBar | None = HealthBar(self) if health_bar else None

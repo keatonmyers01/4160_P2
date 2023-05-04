@@ -6,13 +6,17 @@ import engine
 from engine.entity import Entity, LivingEntity
 from engine.location import Location
 from game.enemy import Enemy
-from game.tower import Tower, TowerStage, EntityTargetType, calculate_projectile_vel
+from game.tower import Tower, TowerStage, EntityTargetType, calculate_projectile_vel, TEXTURE_PATH, TowerState
+
+GRAPE_TEXTURE = f'{TEXTURE_PATH}/grape'
 
 
 class GrapeShot(Tower):
 
     def __init__(self):
         super().__init__()
+        self.add_state(TowerState.IDLE, GRAPE_TEXTURE, 1)
+        self.add_state(TowerState.PERFORMING_ABILITY, GRAPE_TEXTURE, 13)
         self._building_cost = 45
         self._max_velocity = 3
         self._damage = 25

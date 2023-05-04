@@ -9,6 +9,7 @@ from engine.entity import Entity
 from engine.sprite import Sprite
 from game.constants import CELL_SIZE
 from game.enemy import Enemy
+from game.grid import Cell
 from game.player import Player
 
 TEXTURE_PATH = 'game/asset/tower'
@@ -47,6 +48,7 @@ class Tower(Sprite):
     # this is an abstract class, so you'll need to create subclasses that extend Tower
 
     def __init__(self,
+                 cell: Cell,
                  *,
                  scalar: float = 1,
                  ticks_per_frame: int = 1,

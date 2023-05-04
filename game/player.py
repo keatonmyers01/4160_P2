@@ -83,7 +83,6 @@ class Player(Sprite):
     def __init__(self):
         super().__init__(PlayerState.IDLE_FACING,
                          bound_to_screen=True,
-                         health_bar=True,
                          priority=50,
                          scalar=0.6,
                          ticks_per_frame=5)
@@ -109,7 +108,7 @@ class Player(Sprite):
         engine.event_handler.register(pygame.MOUSEBUTTONDOWN, self.on_mouse_press)
 
     def on_key_press(self, event: Event) -> None:
-        if not self._accept_input or self._state_change:
+        if not self._accept_input:
             return
         current_velocity = self.velocity
         match event.key:
@@ -128,7 +127,7 @@ class Player(Sprite):
         self.state = PlayerState.bind(PlayerAction.WALK, self._rotation)
 
     def on_key_release(self, event: Event) -> None:
-        if not self._accept_input or self._state_change:
+        if not self._accept_input:
             return
         current_velocity = self.velocity
         match event.key:
@@ -140,21 +139,17 @@ class Player(Sprite):
                 self._velocity = (current_velocity[0], 0)
             case pygame.K_d:
                 self._velocity = (0, current_velocity[1])
-
-        keys_pressed = pygame.key.get_pressed()
-        if True in keys_pressed:
-            print(keys_pressed)
-
         action = PlayerAction.WALK if self.is_moving else PlayerAction.IDLE
         self.state = PlayerState.bind(action, self._rotation)
 
     def on_mouse_press(self, event: Event) -> None:
         if not self._accept_input or self._state_change or event.button != pygame.BUTTON_LEFT:
             return
+        self._accept_input = False
         self.queue_state(PlayerState.bind(PlayerAction.ATTACK, self._rotation), self.post_attack)
 
     def post_attack(self) -> None:
-        pass
+        self._accept_input = True
 
     @property
     def accept_input(self) -> bool:
@@ -169,10 +164,13 @@ class Player(Sprite):
         return 500
 
     def _on_damage(self) -> None:
+        # do nothing
         pass
 
     def _on_heal(self) -> None:
+        # do nothing
         pass
 
     def _on_death(self) -> None:
+        # do nothing
         pass
