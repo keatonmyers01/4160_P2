@@ -13,7 +13,7 @@ GRAPE_TEXTURE = f'{TEXTURE_PATH}/grape'
 class GrapeShot(Tower):
 
     def __init__(self):
-        super().__init__(scalar=3)
+        super().__init__(scalar=3, ticks_per_frame=4)
         self.add_state(TowerState.IDLE, GRAPE_TEXTURE, 1)
         self.add_state(TowerState.PERFORMING_ABILITY, GRAPE_TEXTURE, 13)
         self._building_cost = 45

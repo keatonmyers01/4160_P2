@@ -9,7 +9,7 @@ LEACH_ASSET = f'{TEXTURE_PATH}/tower/leach'
 class Leach(Tower):
 
     def __init__(self):
-        super().__init__(scalar=3)
+        super().__init__(scalar=3, ticks_per_frame=4)
         self.add_state(TowerState.IDLE, LEACH_ASSET, 1)
         self.add_state(TowerState.PERFORMING_ABILITY, LEACH_ASSET, 11)
         self._building_cost = 40

@@ -9,7 +9,7 @@ SNIPER_ASSETS = f'{TEXTURE_PATH}/tower/snipe'
 class Sniper(Tower):
 
     def __init__(self):
-        super().__init__(scalar=3)
+        super().__init__(scalar=3, ticks_per_frame=4)
         self.add_state(TowerState.IDLE, SNIPER_ASSETS, 1)
         self.add_state(TowerState.PERFORMING_ABILITY, SNIPER_ASSETS, 6)
         self._building_cost = 40

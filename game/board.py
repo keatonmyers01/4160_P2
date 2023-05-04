@@ -6,15 +6,19 @@ from typing import Callable, Union
 
 import pygame.image
 from pygame import Rect, Surface
+from pygame.event import Event
 
 import engine
 from engine.entity import Entity, LivingEntity
 from engine.errors import BadArgument
+from engine.event import new_event
 from engine.location import Location
 from engine.sprite import Sprite
 from game.constants import CELL_SIZE
 from game.player import Player
 from game.texture import Texture
+
+ON_ENEMY_DEATH = new_event()
 
 
 class Cell(Entity):
@@ -393,7 +397,7 @@ class Enemy(Sprite):
         super().__init__(EnemyState.EXISTING,
                          ticks_per_frame=3,
                          scalar=2,
-                         priority=10,
+                         priority=40,
                          health_bar=True)
         self.add_state(EnemyState.EXISTING, 'game/asset', 6)
         self.location = loc if isinstance(loc, Location) else Location(loc[0], loc[1])
@@ -486,7 +490,7 @@ class Enemy(Sprite):
         pass
 
     def _on_death(self) -> None:
-        pass
+        pygame.event.post(Event(ON_ENEMY_DEATH))
 
 
 CORE_TEXTURE_PATH = f'{TEXTURE_PATH}/core'

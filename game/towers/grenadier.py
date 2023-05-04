@@ -13,7 +13,7 @@ GREN_ASSETS = f'{TEXTURE_PATH}/shrap'
 class Grenadier(Tower):
 
     def __init__(self):
-        super().__init__(scalar=3)
+        super().__init__(scalar=3, ticks_per_frame=4)
         self.add_state(TowerState.IDLE, GREN_ASSETS, 1)
         self.add_state(TowerState.PERFORMING_ABILITY, GREN_ASSETS, 5)
         self._building_cost = 50

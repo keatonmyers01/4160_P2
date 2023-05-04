@@ -12,7 +12,7 @@ HEALER_ASSETS = f'{TEXTURE_PATH}/h1'
 class Healer(Tower):
 
     def __init__(self):
-        super().__init__(scalar=0.75)
+        super().__init__(scalar=0.7, ticks_per_frame=4)
         self.add_state(TowerState.IDLE, HEALER_ASSETS, 1)
         self.add_state(TowerState.PERFORMING_ABILITY, HEALER_ASSETS, 12)
         self._building_cost = 35

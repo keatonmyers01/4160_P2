@@ -11,7 +11,6 @@ import engine
 from engine.color import WHITE, RED, GREEN, BLACK
 from engine.location import Location
 from engine.util import min_max
-from game.texture import Texture
 
 T = TypeVar('T', bound='Entity')
 
@@ -644,9 +643,9 @@ class String(Entity):
 
 class TiledBackground(Entity):
 
-    def __init__(self, texture: Texture, tile_size: tuple[int, int]):
+    def __init__(self, texture: str, tile_size: tuple[int, int]):
         super().__init__(priority=-1)
-        self._texture = pygame.image.load(texture.value)
+        self._texture = pygame.image.load(texture)
         self._texture = pygame.transform.scale(self._texture, tile_size)
 
     def tick(self, tick_count: int) -> None:

@@ -13,7 +13,7 @@ ARCHER_ASSETS = f'{TEXTURE_PATH}/archer'
 class Archer(Tower):
 
     def __init__(self):
-        super().__init__(scalar=3)
+        super().__init__(scalar=3, ticks_per_frame=4)
         self.add_state(TowerState.IDLE, ARCHER_ASSETS, 1)
         self.add_state(TowerState.PERFORMING_ABILITY, ARCHER_ASSETS, 9)
         self._building_cost = 30

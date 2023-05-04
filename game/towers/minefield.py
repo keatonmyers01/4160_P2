@@ -14,7 +14,7 @@ MINE_ASSETS = f'{TEXTURE_PATH}/tower/h2'
 class Minefield(Tower):
 
     def __init__(self):
-        super().__init__(scalar=0.6)
+        super().__init__(scalar=0.6, ticks_per_frame=4)
         self.add_state(TowerState.IDLE, MINE_ASSETS, 1)
         self.add_state(TowerState.PERFORMING_ABILITY, MINE_ASSETS, 15)
         self._building_cost = 0
