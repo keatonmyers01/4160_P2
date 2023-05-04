@@ -5,8 +5,7 @@ from pygame import Surface, Rect
 import engine
 from engine.entity import Entity, LivingEntity
 from engine.location import Location
-from game.enemy import Enemy
-from game.tower import Tower, TowerStage, EntityTargetType, calculate_projectile_vel, TEXTURE_PATH, TowerState
+from game.board import TEXTURE_PATH, Tower, TowerState, Enemy, calculate_projectile_vel, EntityTargetType, TowerStage
 
 GRAPE_TEXTURE = f'{TEXTURE_PATH}/grape'
 

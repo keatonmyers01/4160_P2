@@ -1,19 +1,12 @@
 import random
 
-import pygame
-
-from game.constants import CELL_SIZE
-from game.enemy import Enemy
-from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType
+from game.board import Tower, Enemy, EntityTargetType, TowerStage
 
 
 class Sniper(Tower):
 
     def __init__(self):
         super().__init__()
-        self.texture = pygame.image.load(Texture.CORE_TOWER.value)
-        self.texture = pygame.transform.scale(self.texture, CELL_SIZE)
         self._building_cost = 40
         self._damage = 200
         self._regeneration_rate = 0

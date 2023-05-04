@@ -5,8 +5,7 @@ from pygame import Surface, Rect
 import engine
 from engine.entity import Entity, LivingEntity
 from engine.location import Location
-from game.enemy import Enemy
-from game.tower import Tower, TowerStage, EntityTargetType, calculate_projectile_vel
+from game.board import Tower, Enemy, calculate_projectile_vel, EntityTargetType, TowerStage
 
 
 class ShrapnelCannon(Tower):

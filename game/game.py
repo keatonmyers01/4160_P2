@@ -4,10 +4,8 @@ from pygame.event import Event
 import engine
 from engine.entity import TiledBackground
 from engine.location import Location
-from engine.util import random_color
+from game.board import Grid, Enemy
 from game.constants import BG_TILE_SIZE, GRID_WIDTH, GRID_HEIGHT, FRAMES_PER_SECOND, PIXELS_OFFSCREEN_BOUNDARY
-from game.enemy import Enemy
-from game.grid import Grid
 from game.player import Player
 from game.texture import Texture
 
@@ -29,8 +27,7 @@ class Game:  # Just gonna call it "Game" for now...
 
     def on_left_click(self, event: Event) -> None:
         if event.button == pygame.BUTTON_LEFT:
-            rc = random_color()
-            enemy = Enemy(rc, pygame.mouse.get_pos())
+            enemy = Enemy(pygame.mouse.get_pos())
             engine.entity_handler.register_entity(enemy)
             enemy.spawn()
         elif event.button == pygame.BUTTON_RIGHT:

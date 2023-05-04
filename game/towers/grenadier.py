@@ -1,23 +1,17 @@
 import random
 
-import pygame
 from pygame import Surface, Rect
 
 import engine
 from engine.entity import Entity
 from engine.location import Location
-from game.constants import CELL_SIZE
-from game.enemy import Enemy
-from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType, calculate_projectile_vel
+from game.board import Tower, Enemy, calculate_projectile_vel, EntityTargetType, TowerStage
 
 
 class Grenadier(Tower):
 
     def __init__(self):
         super().__init__()
-        self._texture = pygame.image.load(Texture.CORE_TOWER.value)
-        self._texture = pygame.transform.scale(self._texture, CELL_SIZE)
         self._building_cost = 50
         self._max_velocity = 5
         self._damage = 30

@@ -1,7 +1,6 @@
 import random
 
-from game.enemy import Enemy
-from game.tower import Tower, TowerStage, EntityTargetType
+from game.board import Tower, Enemy, EntityTargetType, TowerStage
 
 
 class Leach(Tower):

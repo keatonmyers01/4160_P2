@@ -5,8 +5,7 @@ from pygame import Surface, Rect
 import engine
 from engine.entity import Entity
 from engine.location import Location
-from game.enemy import Enemy
-from game.tower import Tower, TowerStage, EntityTargetType
+from game.board import Tower, Enemy, EntityTargetType, TowerStage
 
 
 class Minefield(Tower):
@@ -24,7 +23,7 @@ class Minefield(Tower):
         self._lifespan = 5
         self._aoe_radius = 100
 
-    def _on_ability(self, *args: Enemy | None) -> None:
+    def _on_ability(self, *args: Enemy) -> None:
         velocity_seed = random.uniform(0, self._max_velocity)
         x_mod = 1
         y_mod = 1
@@ -84,7 +83,7 @@ class MinefieldProjectile(Entity):
         super().__init__(location, priority)
         self._velocity = velocity
         self._max_velocity = 5
-        self._damage = damage
+        self.damage = damage
         self._radius = 10
         self.color = (0, 0, 0)
         self.travel_time = random.randint(15, 25)
@@ -121,6 +120,4 @@ class MinefieldProjectile(Entity):
 
     def on_collide(self):
         enemies = self.nearby_entities_type(self._aoe_radius, Enemy)
-        for enemy in enemies:
-            enemy.damage(self._damage)
         self.dispose()

@@ -4,10 +4,7 @@ from pygame import Surface, Rect
 import engine
 from engine.entity import Entity
 from engine.location import Location
-from game.constants import CELL_SIZE
-from game.enemy import Enemy
-from game.texture import Texture
-from game.tower import Tower, TowerStage, EntityTargetType, calculate_projectile_vel
+from game.board import Enemy, EntityTargetType, Tower, TowerStage, calculate_projectile_vel
 
 
 class Healer(Tower):
