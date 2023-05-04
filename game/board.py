@@ -60,11 +60,13 @@ class Cell(Entity):
     def tower(self, value: 'Tower | None') -> None:
         value.location = self.location.copy()
         self._tower = value
+        value.cell = self
         if value:
             engine.entity_handler.register_entity(value)
             value.spawn()
         if not value and self._tower:
             self._tower.dispose()
+            self._tower.cell = None
 
     @property
     def cell_above(self) -> 'Cell | None':
@@ -274,6 +276,38 @@ class Tower(Sprite):
         self._stage = value
         self._on_upgrade(value)
 
+    @property
+    def cell(self) -> Cell | None:
+        return self._cell
+
+    @cell.setter
+    def cell(self, value: Cell | None) -> None:
+        self._cell = value
+
+    @property
+    def tower_above(self) -> 'Tower | None':
+        if not self._cell:
+            return None
+        return self._cell.cell_above.tower
+
+    @property
+    def tower_left(self) -> 'Tower | None':
+        if not self._cell:
+            return None
+        return self._cell.cell_left.tower
+
+    @property
+    def tower_right(self) -> 'Tower | None':
+        if not self._cell:
+            return None
+        return self._cell.cell_right.tower
+    
+    @property
+    def tower_below(self) -> 'Tower | None':
+        if not self._cell:
+            return None
+        return self._cell.cell_below.tower
+
     def regeneration_rate(self) -> int:
         """
         The amount of regeneration per second.
@@ -385,12 +419,10 @@ class Enemy(Sprite):
             x_velocity *= -1
         if y_distance < 0:
             y_velocity *= -1
-
         return x_velocity, y_velocity
 
     def tick(self, tick_count: int) -> None:
         super().tick(tick_count)
-
         # reestablish a target every second
         if (self._target_timer % 30 and not self.on_target) or self._target_timer == 0:
             target_range = 1
@@ -437,7 +469,6 @@ class Enemy(Sprite):
         if self.on_target:
             self._on_ability()
             self.on_cooldown = True
-            return
         else:
             self.on_cooldown = False
 
@@ -464,7 +495,7 @@ CORE_TEXTURE_PATH = f'{TEXTURE_PATH}/core'
 class CoreTower(Tower):
 
     def __init__(self):
-        super().__init__(scalar=0.4, ticks_per_frame=4)
+        super().__init__(scalar=0.6, ticks_per_frame=4)
         self.add_state(TowerState.IDLE, CORE_TEXTURE_PATH, 1)
         self.add_state(TowerState.PERFORMING_ABILITY, CORE_TEXTURE_PATH, 8)
         self._building_cost = 0

@@ -23,9 +23,9 @@ class Entity(ABC):
     An entity is anything that can be drawn to the screen.
     """
 
-    def __init__(self, loc: Location = Location(), priority: int = 0):
+    def __init__(self, loc: Location | None = None, priority: int = 0):
         self._id = uuid.uuid4()
-        self._loc = loc
+        self._loc = loc if loc else Location(0, 0)
         self._dirty = True
         self._loaded = False
         self._visible = False
@@ -323,14 +323,14 @@ class HealthBar(Entity):
 
 class LivingEntity(Entity):
 
-    def __init__(self, location: Location = Location(),
+    def __init__(self,
                  priority: int = 0,
                  *,
                  health: int = 10,
                  velocity: tuple[float, float] = (0, 0),
                  health_bar: bool = False,
                  bound_to_screen: bool = False):
-        super().__init__(location, priority)
+        super().__init__(priority=priority)
         self._health = max(health, self.max_health)
         self._max_health = self.max_health
         self._velocity = velocity
