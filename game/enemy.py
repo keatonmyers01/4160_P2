@@ -113,6 +113,7 @@ class Enemy(Sprite):
         print(f"I am dying {self.location}")
 
     def _on_damage(self) -> None:
+        print("taking damage")
         pass
 
     def _on_heal(self) -> None:

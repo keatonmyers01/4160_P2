@@ -358,8 +358,8 @@ class Enemy(Sprite):
     def __init__(self, mouse_pos: tuple[int, int]):
         super().__init__(EnemyState.EXISTING, priority=10, health_bar=True)
         self.add_state(EnemyState.EXISTING, 'game/asset', 6)
-        self.location.x = mouse_pos[0]
-        self.location.y = mouse_pos[1]
+        self.location = Location()
+        self.location.add(mouse_pos[0], mouse_pos[1])
         self.on_cooldown = True
         self._type: bool = bool(randint(0, 1))
         self._target_timer: int = 0
