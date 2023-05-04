@@ -363,6 +363,7 @@ class Enemy(Sprite):
         self.on_cooldown = True
         self._type: bool = bool(randint(0, 1))
         self._target_timer: int = 0
+        self.aquired_target: bool = False
         self.target: LivingEntity | None = None
         self._velocity: tuple[float, float] = (0, 0)
         self.max_velocity: int = 2
@@ -393,11 +394,18 @@ class Enemy(Sprite):
         # reestablish a target every second
         if (self._target_timer % 30 and not self.on_target) or self._target_timer == 0:
             target_range = 1
-            targets = self.nearby_entities_type(target_range * 50, Tower)
+            if self.aquired_target:
+                search_factor = 20
+            else:
+                search_factor = 300
+            targets = self.nearby_entities_type(target_range * search_factor, Tower)
             while len(targets) <= 0:
-                targets = self.nearby_entities_type(target_range * 50, Tower)
+                targets = self.nearby_entities_type(target_range * search_factor, Tower)
                 target_range += 1
+                if target_range == 6:
+                    return
             self.target = choice(targets)
+            self.aquired_target = True
         self._target_timer += 1
 
         # move towards target
@@ -421,9 +429,11 @@ class Enemy(Sprite):
         return 0.5
 
     def _on_ability(self):
+        print("on ability")
         self.target.damage(self.damage)
 
     def perform_ability(self) -> None:
+        print("performing ability")
         if self.on_target:
             self._on_ability()
             self.on_cooldown = True
