@@ -1,3 +1,3 @@
 # 4160_P2
 
-![video](https://cdn.discordapp.com/attachments/1083139369193451531/1103534371639672862/2023-05-04_00-10-39.mp4)
+https://user-images.githubusercontent.com/16947464/236111292-6b220717-5d53-4efa-82e3-0b82752876ca.mp4
